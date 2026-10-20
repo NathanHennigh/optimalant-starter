@@ -1,0 +1,18 @@
+{
+  "goal": {
+    "id": "evening-routine",
+    "title": "A calmer evening",
+    "actions": [
+      { "id": "read", "label": "Read for 10 minutes" },
+      { "id": "plan", "label": "Write down tomorrow's first task" }
+    ]
+  },
+  "startDate": "2026-01-01",
+  "throughDate": "2026-01-04",
+  "history": [
+    { "date": "2026-01-01", "completedActions": ["read", "plan"] },
+    { "date": "2026-01-02", "completedActions": ["read"] },
+    { "date": "2026-01-03", "completedActions": ["read", "plan"] }
+  ],
+  "checkIn": { "date": "2026-01-04", "completedActions": ["read", "plan"] }
+}

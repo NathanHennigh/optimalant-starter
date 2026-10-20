@@ -1,0 +1,14 @@
+{
+  "name": "optimalant-starter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A local reference for check-in evaluation and a controlled coach adapter.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "example": "node src/example.mjs",
+    "test": "node --test"
+  }
+}
