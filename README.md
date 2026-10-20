@@ -1,23 +1,39 @@
 # OptimalAnt developer starter
 
-A small, runnable reference for one boundary:
+Clone this repository to run a complete local example:
 
-**Goal + check-in event → deterministic consistency evaluation → coach reply.**
+**Goal + check-in → rules evaluate progress → coach returns a reply.**
 
-It runs locally with Node.js 22 or newer, no dependencies, and no API keys. The default coach is a fixed template, not a language model. All sample data is invented. This is a separate reference project, not the private OptimalAnt application or a released production developer API.
+Investors can see the flow run with invented data. Builders can inspect the rules, adapter interface, and local HTTP endpoint. This is a standalone reference, with no access to the private OptimalAnt application, live API, or member data.
 
-## Run it
+## Try it in about two minutes
+
+With **Node.js 22+ and Git installed**, cloning and running the example should take about two minutes. No dependency installs, accounts, API keys, or server startup are needed.
 
 ```sh
 git clone https://github.com/NathanHennigh/optimalant-starter.git
 cd optimalant-starter
-node --version
-npm test
 npm run example
+```
+
+You'll see JSON for an invented four-day evening routine: **3 of 4 days complete, 75% completion, and a current streak of 2**, followed by:
+
+> All 2 actions recorded. Your streak is 2 days. Choose a time for your next check-in.
+
+The reply comes from **a local template, not Claude or another AI model**. Nothing is sent to a provider or saved; the output includes `persisted: false`.
+
+Start reading with the [synthetic input](fixtures/evening-routine.json), [rules engine](src/evaluation.mjs), and [coach adapter](src/coach.mjs).
+
+## Run the tests and local API
+
+After trying the example:
+
+```sh
+npm test
 npm start
 ```
 
-No `npm install` step is needed. The server binds only to `127.0.0.1:8787`; set `PORT` if that local port is occupied.
+The optional server binds only to `127.0.0.1:8787`; set `PORT` if that local port is occupied. It exposes the same evaluation through HTTP. See [API.md](API.md) for the request format and errors.
 
 From a second terminal:
 
@@ -27,8 +43,6 @@ curl -X POST http://127.0.0.1:8787/v1/evaluations -H "Content-Type: application/
 ```
 
 In Windows PowerShell, use `curl.exe` for those commands. Run them from the repository root.
-
-The example returns **3 of 4 days complete, 75% completion, and a current streak of 2**, with a short local coaching reply. `persisted: false` is explicit: the endpoint does not save progress.
 
 ## What this demonstrates
 
@@ -69,4 +83,4 @@ Possible future work includes a versioned authenticated developer API, reviewed 
 
 ## Reuse
 
-Source-readable; reuse terms are undecided. See [RIGHTS.md](RIGHTS.md). This repository has no open-source license. `private: true` in `package.json` prevents accidental npm publication; GitHub visibility is a separate setting.
+You may clone and run this reference locally for inspection and evaluation. Broader reuse terms are undecided; this repository has no open-source license. See [RIGHTS.md](RIGHTS.md). `private: true` in `package.json` prevents accidental npm publication; GitHub visibility is a separate setting.
