@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "consistency-14",
+  "version": "1.0.0",
+  "name": "14-day consistency challenge",
+  "durationDays": 14,
+  "calendar": { "timeZone": "America/New_York", "weekStartsOn": 1 },
+  "parameters": {
+    "protein-goal": { "label": "Daily protein goal in grams", "default": 160, "min": 1, "max": 1000 },
+    "strength-days": { "label": "Strength sessions per calendar week", "default": 3, "min": 1, "max": 7 }
+  },
+  "actions": [
+    { "id": "protein", "label": "Reach your protein goal", "type": "number", "unit": "g", "integer": true, "cadence": "daily", "target": { "parameter": "protein-goal" }, "requiredForDay": true },
+    { "id": "movement", "label": "8,000 steps or 30 minutes of cardio", "type": "boolean", "cadence": "daily", "target": true, "requiredForDay": true },
+    { "id": "sleep", "label": "At least 7 hours of sleep", "type": "boolean", "cadence": "daily", "target": true, "requiredForDay": true },
+    { "id": "strength", "label": "Strength session completed", "type": "boolean", "cadence": "weekly", "target": true, "weeklyTarget": { "parameter": "strength-days" }, "requiredForDay": false }
+  ],
+  "consistency": { "graceDays": 2, "graceMode": "bridge" },
+  "milestones": [
+    { "at": 1, "label": "Ember" },
+    { "at": 3, "label": "Spark" },
+    { "at": 7, "label": "Steady" },
+    { "at": 14, "label": "Locked" }
+  ],
+  "coach": { "promptFile": "coach.md", "responseVersion": 1 }
+}

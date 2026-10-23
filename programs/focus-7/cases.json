@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "first-session-complete",
+      "description": "Twenty focused minutes meets the default daily target.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 20 } }] },
+      "expected": { "completedDays": 1, "consistencyDays": 1, "graceRemaining": 0, "tier": "Started" }
+    },
+    {
+      "id": "short-session-open",
+      "description": "Nineteen minutes does not meet the default target; the current day remains open.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 19 } }] },
+      "expected": { "completedDays": 0, "consistencyDays": 0, "graceUsed": 0 }
+    },
+    {
+      "id": "personal-focus-target",
+      "description": "A configured thirty-minute session uses the same rules engine.",
+      "input": { "startDate": "2026-10-19", "parameters": { "focus-minutes": 30 }, "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 25 } }] },
+      "expected": { "completedDays": 0, "consistencyDays": 0 }
+    },
+    {
+      "id": "today-can-still-be-completed",
+      "description": "An unsaved current day preserves yesterday's streak until local midnight.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-20T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 20 } }] },
+      "expected": { "completedDays": 1, "consistencyDays": 1, "tier": "Started" }
+    },
+    {
+      "id": "missed-day-resets",
+      "description": "This program has no grace days, so a closed missed day resets consistency.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-21T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 20 } }] },
+      "expected": { "completedDays": 1, "consistencyDays": 0, "graceUsed": 0, "tier": "Begin again" }
+    },
+    {
+      "id": "new-streak-after-miss",
+      "description": "A completed session after a missed day starts a new count at one.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-21T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 20 } }, { "id": "day3", "date": "2026-10-21", "recordedAt": "2026-10-21T21:00:00Z", "values": { "focus": 25 } }] },
+      "expected": { "completedDays": 2, "consistencyDays": 1, "tier": "Started" }
+    },
+    {
+      "id": "fall-back-local-midnight",
+      "description": "After the autumn DST change, Eastern midnight occurs at 05:00 UTC.",
+      "input": { "startDate": "2026-11-01", "asOf": "2026-11-02T04:59:59Z", "checkins": [{ "id": "day1", "date": "2026-11-01", "recordedAt": "2026-11-02T04:30:00Z", "values": { "focus": 20 } }] },
+      "expected": { "asOfDate": "2026-11-01", "dayNumber": 1, "completedDays": 1, "consistencyDays": 1 }
+    }
+  ]
+}

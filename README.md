@@ -1,14 +1,16 @@
-# OptimalAnt developer starter
+# OptimalAnt plane reference
 
-Clone this repository to run a complete local example:
+A small local foundation for programs, check-ins, coaching, and outcome evaluation:
 
-**Goal + check-in → rules evaluate progress → coach returns a reply.**
+**Define a program → record a check-in → calculate progress → coach → record the outcome → compare a change.**
 
-Investors can see the flow run with invented data. Builders can inspect the rules, adapter interface, and local HTTP endpoint. This is a standalone reference, with no access to the private OptimalAnt application, live API, or member data.
+The same engine runs a 14-day consistency challenge and a 7-day focus sprint. Programs supply data, coaching instructions, and sample cases; the engine owns validation, progress, and persistence. This is a standalone reference with synthetic examples, not the private OptimalAnt application or a hosted API.
 
-## Try it in about two minutes
+**Reuse terms are still pending.** You may clone and run this repository locally for inspection and evaluation. It has no open-source license or permission for redistribution or incorporation into another product. See [RIGHTS.md](RIGHTS.md).
 
-With **Node.js 22+ and Git installed**, cloning and running the example should take about two minutes. No dependency installs, accounts, API keys, or server startup are needed.
+## Try the complete loop
+
+With **Git and Node.js 22.13 or newer installed**, the offline example requires no dependency installation, accounts, or API keys:
 
 ```sh
 git clone https://github.com/NathanHennigh/optimalant-starter.git
@@ -16,71 +18,86 @@ cd optimalant-starter
 npm run example
 ```
 
-You'll see JSON for an invented four-day evening routine: **3 of 4 days complete, 75% completion, and a current streak of 2**, followed by:
+The example runs both programs with invented participants and a temporary SQLite database. It demonstrates saved check-ins, calculated progress, a local coach reply, and a reported outcome. The local coach is a deterministic template, not an AI model. Node may print an experimental SQLite warning.
 
-> All 2 actions recorded. Your streak is 2 days. Choose a time for your next check-in.
-
-The reply comes from **a local template, not Claude or another AI model**. Nothing is sent to a provider or saved; the output includes `persisted: false`.
-
-Start reading with the [synthetic input](fixtures/evening-routine.json), [rules engine](src/evaluation.mjs), and [coach adapter](src/coach.mjs).
-
-## Run the tests and local API
-
-After trying the example:
+Then inspect the program definitions and run the evaluation harness:
 
 ```sh
+npm run check:programs
+npm run evaluate
 npm test
+```
+
+The harness checks rules against explicit expected results and compares coach behavior on fixed cases. An offline pass does **not** mean a model has been tested or that a program improves real-world health or habits. See [the evaluation guide](docs/evaluation.md).
+
+## Start the local API
+
+```sh
 npm start
 ```
 
-The optional server binds only to `127.0.0.1:8787`; set `PORT` if that local port is occupied. It exposes the same evaluation through HTTP. See [API.md](API.md) for the request format and errors.
+The server binds to `127.0.0.1:8787`. Enrollment, check-in, coach-trace, and outcome records persist in `.data/plane.sqlite` across restarts. Use synthetic data; the database is a local unencrypted file. Do not publish this server or expose it through a tunnel.
 
 From a second terminal:
 
 ```sh
 curl http://127.0.0.1:8787/health
-curl -X POST http://127.0.0.1:8787/v1/evaluations -H "Content-Type: application/json" --data-binary @fixtures/evening-routine.json
+curl http://127.0.0.1:8787/v1/programs
 ```
 
-In Windows PowerShell, use `curl.exe` for those commands. Run them from the repository root.
+PowerShell users can use the native request examples in [API.md](API.md). That guide covers the complete check-in → coach → outcome sequence. [openapi.json](openapi.json) is the machine-readable local API contract.
 
-## What this demonstrates
+When forwarding CLI options from PowerShell, use `npm.cmd`, for example `npm.cmd run evaluate -- --program focus-7`, so the npm PowerShell wrapper does not drop option names.
 
-- Strict validation of a goal, earlier daily records, and a new check-in event.
-- A pure rules engine with predictable results, independent of AI or the server clock.
-- A coach adapter that sees a frozen projection and returns text only.
-- A small HTTP interface with bounded JSON input and useful errors.
-- Unit and local HTTP tests that require no accounts or external services.
+## What makes another program possible
 
-The new event must match `throughDate`; history must precede it. One date is complete only when every configured action is present. Missing dates are incomplete. The current streak ends at `throughDate`, and an incomplete final date makes it zero. Dates are explicit calendar labels, evaluated as closed days; UTC is used only for calendar arithmetic.
-
-These deliberately simple rules are **not a copy of the live challenge's business rules**. There are no grace days, time-zone deadlines, scheduled strength rules, rewards, payments, or renewals in this starter. Repeated requests evaluate the supplied data again; they do not create or update an account.
-
-## Coach boundary
-
-`src/coach.mjs` defines the `reply(context)` interface. `runEvaluation(input, adapter)` accepts a trusted adapter from application code; HTTP callers cannot select a provider, supply a system prompt, or inject tools. The context contains only the validated goal, the new check-in, and its computed evaluation. Adapter output cannot override progress.
-
-The default is deterministic. A real model adapter is **not included**. Before adding one, design consent, sensitive-data handling, server-held credentials, timeouts, output validation, budget controls, and a fallback. Treat goal text and future user notes as untrusted data. A read-only context prevents accidental mutation; it is not a sandbox for untrusted plug-in code. Do not load user-submitted adapters into this process.
-
-## Files
+Each program lives in a directory with three files:
 
 | File | Purpose |
 | --- | --- |
-| `src/evaluation.mjs` | Validation and pure consistency evaluation |
-| `src/coach.mjs` | Text-only adapter boundary and local template |
-| `src/server.mjs` | Local HTTP server |
-| `src/example.mjs` | Direct, no-server example |
-| `fixtures/evening-routine.json` | Synthetic request |
-| `test/` | Rules, adapter boundary, and HTTP tests |
-| [API.md](API.md) | Request, response, errors, and curl usage |
-| [SECURITY.md](SECURITY.md) | Local-only security boundary and production gaps |
+| `program.json` | Duration, parameters, daily and weekly actions, consistency rules, and milestones |
+| `coach.md` | Program-specific instructions for the coach |
+| `cases.json` | Synthetic cases with expected progress and coaching checks |
 
-## What is not built here
+The [program guide](docs/programs.md) explains the supported building blocks and how to try a third program locally without changing the engine. The shipped focus program is the second example of this boundary; it is not a separate implementation.
 
-This is not an agent marketplace, model registry, wearable integration, health recommendation engine, SMS gateway, or social inbox bot. It has no accounts, authentication, database, durable events, API keys, billing, or access to the OptimalAnt service. It does not share the application's code, data, images, or documents.
+This is a bounded configuration format, not a general-purpose programming language. A new kind of rule may require an engine change and tests. Program folders are trusted local files loaded at startup; there is no HTTP upload or execution of third-party code.
 
-Possible future work includes a versioned authenticated developer API, reviewed coaching packs, and permissioned wearable connections. Those are roadmap ideas, not capabilities of this repository or commitments to a release date.
+## Rules and coaching are separate
 
-## Reuse
+- The rules engine determines completion, streaks, grace use, weekly progress, and milestones.
+- A coach receives the program instructions plus a validated snapshot of the participant's context and calculated progress.
+- The coach returns a message and a proposed next action. It cannot rewrite check-ins, award milestones, or change the rules.
+- A saved trace records what was recommended and the program/coach information used. A later outcome attaches a participant-reported note to that trace.
+- The evaluation harness replays fixed cases to help review a proposed change. It never automatically promotes a prompt, model, or rule into production.
 
-You may clone and run this reference locally for inspection and evaluation. Broader reuse terms are undecided; this repository has no open-source license. See [RIGHTS.md](RIGHTS.md). `private: true` in `package.json` prevents accidental npm publication; GitHub visibility is a separate setting.
+Self-reported outcomes are observations, not proof that a recommendation caused improvement. The reference does not train or fine-tune a model.
+
+## Optional Claude connection
+
+The default remains offline even if an API key happens to exist in the environment. To make real provider calls, explicitly set all three:
+
+```text
+COACH_PROVIDER=claude
+ANTHROPIC_API_KEY=<your own key>
+ANTHROPIC_MODEL=<a model ID available to your account>
+```
+
+For the evaluation harness, opt in separately with `--claude`; follow [the evaluation guide](docs/evaluation.md). Never commit a key. Claude calls transmit the supplied program instructions and coaching context to Anthropic and can incur charges. Use invented data while evaluating this reference. The implementation bounds and validates replies, records failures, and falls back to the local coach. Tests mock the provider and do not establish that a live key or model is available.
+
+## Configuration
+
+| Variable | Default / use |
+| --- | --- |
+| `PORT` | `8787`; local HTTP port |
+| `PLANE_DB_PATH` | `.data/plane.sqlite`; local SQLite file |
+| `PROGRAMS_DIR` | `programs`; trusted local program directories, loaded at startup |
+| `COACH_PROVIDER` | `local`; explicitly choose `claude` for live coaching |
+| `ANTHROPIC_API_KEY` | Required only for explicitly enabled Claude calls |
+| `ANTHROPIC_MODEL` | Required explicit model ID for Claude; no hidden model default |
+
+## Boundaries
+
+This release has no authentication, hosted developer service, public deployment configuration, payment processing, SMS, wearable connections, social inboxes, model marketplace, or automatic self-improvement. It has no access to OptimalAnt production data, keys, card artwork, or private coaching prompts. The challenge definition demonstrates the current consistency rules; it does not grant free rounds, charge for renewals, or generate production cards.
+
+Read [SECURITY.md](SECURITY.md) before running the API, [API.md](API.md) for the local contract, [docs/programs.md](docs/programs.md) for program definitions, [docs/evaluation.md](docs/evaluation.md) for comparisons, and [CONTRIBUTING.md](CONTRIBUTING.md) for reporting an issue.

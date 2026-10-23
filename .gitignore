@@ -5,3 +5,8 @@ node_modules/
 coverage/
 *.log
 .DS_Store
+.data/
+artifacts/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "first-day-complete",
+      "description": "Three daily targets complete a recovery day without a strength session.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 160, "movement": true, "sleep": true, "strength": false } }] },
+      "expected": { "dayNumber": 1, "completedDays": 1, "consistencyDays": 1, "graceUsed": 0, "tier": "Ember" }
+    },
+    {
+      "id": "partial-day-open",
+      "description": "Protein below target leaves today's check-in open without using grace.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 159, "movement": true, "sleep": true } }] },
+      "expected": { "completedDays": 0, "consistencyDays": 0, "graceUsed": 0, "graceRemaining": 2, "tier": "Begin again" }
+    },
+    {
+      "id": "personal-protein-goal",
+      "description": "The participant's protein target overrides the example default.",
+      "input": { "startDate": "2026-10-19", "parameters": { "protein-goal": 120 }, "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 120, "movement": true, "sleep": true } }] },
+      "expected": { "completedDays": 1, "consistencyDays": 1, "tier": "Ember" }
+    },
+    {
+      "id": "grace-protects-earned-card",
+      "description": "A closed missed day uses grace but does not itself advance the earned streak.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-21T14:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 160, "movement": true, "sleep": true } }] },
+      "expected": { "completedDays": 1, "consistencyDays": 1, "graceUsed": 1, "graceRemaining": 1, "tier": "Ember" }
+    },
+    {
+      "id": "completed-day-bridges-grace",
+      "description": "Completing the next day bridges a protected miss and advances the consistency count.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-21T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 160, "movement": true, "sleep": true } }, { "id": "day3", "date": "2026-10-21", "recordedAt": "2026-10-21T21:00:00Z", "values": { "protein": 170, "movement": true, "sleep": true } }] },
+      "expected": { "completedDays": 2, "consistencyDays": 3, "graceUsed": 1, "tier": "Spark" }
+    },
+    {
+      "id": "grace-does-not-replenish",
+      "description": "After two protected misses, a third closed miss resets the streak.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-23T14:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 160, "movement": true, "sleep": true } }] },
+      "expected": { "completedDays": 1, "consistencyDays": 0, "graceUsed": 2, "graceRemaining": 0, "tier": "Begin again" }
+    },
+    {
+      "id": "latest-snapshot-replaces",
+      "description": "A later same-day correction replaces the entire previous snapshot; it does not merge omitted fields.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "initial", "date": "2026-10-19", "recordedAt": "2026-10-19T20:00:00Z", "values": { "protein": 160, "movement": true, "sleep": true } }, { "id": "correction", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 140 } }] },
+      "expected": { "completedDays": 0, "consistencyDays": 0, "graceUsed": 0 }
+    },
+    {
+      "id": "eastern-day-before-midnight",
+      "description": "UTC can already be tomorrow while the Eastern check-in remains open.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-20T03:59:59Z", "checkins": [] },
+      "expected": { "asOfDate": "2026-10-19", "dayNumber": 1, "graceUsed": 0 }
+    },
+    {
+      "id": "eastern-midnight-closes-day",
+      "description": "The prior day closes at midnight Eastern, not midnight UTC.",
+      "input": { "startDate": "2026-10-19", "asOf": "2026-10-20T04:00:00Z", "checkins": [] },
+      "expected": { "asOfDate": "2026-10-20", "dayNumber": 2, "graceUsed": 1, "consistencyDays": 0 }
+    },
+    {
+      "id": "weekly-strength-is-separate",
+      "description": "A strength session can be recorded while daily targets are incomplete.",
+      "input": { "startDate": "2026-10-19", "parameters": { "strength-days": 1 }, "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "strength1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "strength": true } }] },
+      "expected": { "completedDays": 0, "consistencyDays": 0, "graceUsed": 0 }
+    }
+  ]
+}

@@ -1,14 +1,18 @@
 {
   "name": "optimalant-starter",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "A local reference for check-in evaluation and a controlled coach adapter.",
+  "description": "A local improvement-plane reference: declarative programs, durable traces, pluggable coaching and regression evaluation.",
   "type": "module",
   "license": "UNLICENSED",
-  "engines": { "node": ">=22" },
+  "engines": { "node": ">=22.13.0" },
   "scripts": {
-    "start": "node src/server.mjs",
-    "example": "node src/example.mjs",
+    "start": "node src/plane-server.mjs",
+    "example": "node src/cli.mjs example",
+    "evaluate": "node src/cli.mjs evaluate",
+    "check:programs": "node src/cli.mjs check-programs",
+    "legacy:example": "node src/example.mjs",
+    "legacy:server": "node src/server.mjs",
     "test": "node --test"
   }
 }

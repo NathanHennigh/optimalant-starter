@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "focus-7",
+  "version": "1.0.0",
+  "name": "7-day focus sprint",
+  "durationDays": 7,
+  "calendar": { "timeZone": "America/New_York", "weekStartsOn": 1 },
+  "parameters": {
+    "focus-minutes": { "label": "Focused minutes per day", "default": 20, "min": 1, "max": 240 }
+  },
+  "actions": [
+    { "id": "focus", "label": "Complete your focused work session", "type": "number", "unit": "minutes", "integer": true, "cadence": "daily", "target": { "parameter": "focus-minutes" }, "requiredForDay": true }
+  ],
+  "consistency": { "graceDays": 0, "graceMode": "bridge" },
+  "milestones": [
+    { "at": 1, "label": "Started" },
+    { "at": 3, "label": "Building" },
+    { "at": 7, "label": "Finished" }
+  ],
+  "coach": { "promptFile": "coach.md", "responseVersion": 1 }
+}

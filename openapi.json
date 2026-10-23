@@ -1,0 +1,1805 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OptimalAnt local plane reference",
+    "version": "1.0.0",
+    "description": "Single-process, loopback-only reference with SQLite persistence. This is not an API for optimalant.ai and has no authentication. Use synthetic data. Current source terms permit local inspection/evaluation only; no open-source or commercial-reuse license has been granted.",
+    "license": {
+      "name": "All rights reserved — local inspection and evaluation only",
+      "url": "https://github.com/NathanHennigh/optimalant-starter/blob/main/RIGHTS.md"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8787",
+      "description": "Local reference. Do not expose publicly."
+    }
+  ],
+  "security": [],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "summary": "Read local service status",
+        "responses": {
+          "200": {
+            "description": "Successful local operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          }
+        }
+      }
+    },
+    "/v1/programs": {
+      "get": {
+        "operationId": "listPrograms",
+        "summary": "List currently loaded program definitions",
+        "responses": {
+          "200": {
+            "description": "Successful local operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgramList"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          }
+        }
+      }
+    },
+    "/v1/enrollments": {
+      "post": {
+        "operationId": "createEnrollment",
+        "summary": "Start a local program enrollment",
+        "description": "The server assigns startDate and createdAt. A repeated ID with identical request content returns the saved enrollment and current progress. Different content returns 409. The program version, prompt, and cases are pinned.",
+        "requestBody": {
+          "required": true,
+          "description": "Uncompressed JSON; maximum 32 KiB.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEnrollment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful local operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          }
+        }
+      }
+    },
+    "/v1/enrollments/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Enrollment ID. This identifier is not authentication.",
+          "schema": {
+            "$ref": "#/components/schemas/RecordId"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getEnrollment",
+        "summary": "Read enrollment and current computed progress",
+        "responses": {
+          "200": {
+            "description": "Successful local operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentView"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          }
+        }
+      }
+    },
+    "/v1/enrollments/{id}/checkins": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Enrollment ID. This identifier is not authentication.",
+          "schema": {
+            "$ref": "#/components/schemas/RecordId"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "saveCheckin",
+        "summary": "Append today's complete check-in snapshot",
+        "description": "The server assigns date and recordedAt. A new snapshot replaces the entire day's prior values; omitted actions are not merged. Use a new event ID for a correction. Exact retries are deduplicated. New writes outside active round dates fail.",
+        "requestBody": {
+          "required": true,
+          "description": "Uncompressed JSON; maximum 32 KiB.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCheckin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful local operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckinView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          }
+        }
+      }
+    },
+    "/v1/enrollments/{id}/coach": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Enrollment ID. This identifier is not authentication.",
+          "schema": {
+            "$ref": "#/components/schemas/RecordId"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "requestCoach",
+        "summary": "Create or retrieve a coaching trace",
+        "description": "An existing ID returns its original trace, without another provider call. A new ID evaluates current stored progress. Live Claude calls require explicit server configuration. In-flight requests are deduplicated within one process; this is not an exactly-once provider guarantee after a crash.",
+        "requestBody": {
+          "required": true,
+          "description": "Uncompressed JSON; maximum 32 KiB.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestCoach"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful local operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoachView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          }
+        }
+      }
+    },
+    "/v1/enrollments/{id}/traces": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Enrollment ID. This identifier is not authentication.",
+          "schema": {
+            "$ref": "#/components/schemas/RecordId"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listTraces",
+        "summary": "Read coaching traces and reported outcomes",
+        "responses": {
+          "200": {
+            "description": "Successful local operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraceList"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          }
+        }
+      }
+    },
+    "/v1/enrollments/{id}/outcomes": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Enrollment ID. This identifier is not authentication.",
+          "schema": {
+            "$ref": "#/components/schemas/RecordId"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "reportOutcome",
+        "summary": "Attach a participant-reported outcome to a trace",
+        "description": "The trace must belong to this enrollment. Reports do not change progress, train a model, or prove causation. Same-ID identical retries return the saved outcome.",
+        "requestBody": {
+          "required": true,
+          "description": "Uncompressed JSON; maximum 32 KiB.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportOutcome"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful local operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutcomeView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RecordId": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80,
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$"
+      },
+      "ProgramId": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 40,
+        "pattern": "^[a-z][a-z0-9-]{0,39}$"
+      },
+      "Context": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "goal": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "startingPoint": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "maxItems": 8
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "required": []
+      },
+      "Parameters": {
+        "type": "object",
+        "maxProperties": 12,
+        "propertyNames": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "pattern": "^[a-z][a-z0-9-]{0,39}$"
+        },
+        "additionalProperties": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "description": "Known program setting IDs only; values must meet the selected definition's range and integer requirements."
+      },
+      "Values": {
+        "type": "object",
+        "maxProperties": 12,
+        "propertyNames": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "pattern": "^[a-z][a-z0-9-]{0,39}$"
+        },
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          ]
+        },
+        "description": "Known action IDs only; each value must match the action's type and any integer requirement. This is a complete daily snapshot, not a patch."
+      },
+      "Target": {
+        "oneOf": [
+          {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "parameter": {
+                "$ref": "#/components/schemas/ProgramId"
+              }
+            },
+            "required": [
+              "parameter"
+            ]
+          }
+        ]
+      },
+      "ParameterDefinition": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "default": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "min": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "max": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
+          }
+        },
+        "required": [
+          "label",
+          "default",
+          "min",
+          "max"
+        ]
+      },
+      "Action": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ProgramId"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "type": {
+            "enum": [
+              "number",
+              "boolean"
+            ]
+          },
+          "cadence": {
+            "enum": [
+              "daily",
+              "weekly"
+            ]
+          },
+          "target": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "$ref": "#/components/schemas/Target"
+              }
+            ]
+          },
+          "requiredForDay": {
+            "type": "boolean"
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "integer": {
+            "type": "boolean"
+          },
+          "weeklyTarget": {
+            "$ref": "#/components/schemas/Target"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "type",
+          "cadence",
+          "target",
+          "requiredForDay"
+        ],
+        "description": "A numeric target is met at or above its value; booleans must equal their target. Weekly targets count distinct days meeting the action target, from 1 to 7.",
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "boolean"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "target": {
+                  "type": "boolean"
+                }
+              },
+              "not": {
+                "required": [
+                  "integer"
+                ]
+              }
+            },
+            "else": {
+              "properties": {
+                "target": {
+                  "$ref": "#/components/schemas/Target"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "cadence": {
+                  "const": "weekly"
+                }
+              },
+              "required": [
+                "cadence"
+              ]
+            },
+            "then": {
+              "required": [
+                "weeklyTarget"
+              ],
+              "properties": {
+                "requiredForDay": {
+                  "const": false
+                }
+              }
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "weeklyTarget"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ProgramDefinition": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schemaVersion": {
+            "const": 1
+          },
+          "id": {
+            "$ref": "#/components/schemas/ProgramId"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "durationDays": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 90
+          },
+          "calendar": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "timeZone": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80,
+                "description": "An IANA time zone supported by the Node.js runtime."
+              },
+              "weekStartsOn": {
+                "const": 1
+              }
+            },
+            "required": [
+              "timeZone",
+              "weekStartsOn"
+            ]
+          },
+          "parameters": {
+            "type": "object",
+            "maxProperties": 12,
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "pattern": "^[a-z][a-z0-9-]{0,39}$"
+            },
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ParameterDefinition"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "maxItems": 12,
+            "minItems": 1
+          },
+          "consistency": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "graceDays": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 14
+              },
+              "graceMode": {
+                "const": "bridge"
+              }
+            },
+            "required": [
+              "graceDays",
+              "graceMode"
+            ]
+          },
+          "milestones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 90
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              },
+              "required": [
+                "at",
+                "label"
+              ]
+            },
+            "maxItems": 12
+          },
+          "coach": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "promptFile": {
+                "const": "coach.md"
+              },
+              "responseVersion": {
+                "const": 1
+              }
+            },
+            "required": [
+              "promptFile",
+              "responseVersion"
+            ]
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "id",
+          "version",
+          "name",
+          "durationDays",
+          "calendar",
+          "parameters",
+          "actions",
+          "consistency",
+          "milestones",
+          "coach"
+        ],
+        "description": "Versioned, trusted local program configuration. At least one required daily action; distinct action IDs; ascending milestone thresholds within duration; grace cannot exceed duration. These cross-field constraints are validated by the implementation."
+      },
+      "Enrollment": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "programId": {
+            "$ref": "#/components/schemas/ProgramId"
+          },
+          "programVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "programFingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/Parameters"
+          },
+          "context": {
+            "$ref": "#/components/schemas/Context"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "programId",
+          "programVersion",
+          "programFingerprint",
+          "startDate",
+          "parameters",
+          "context",
+          "createdAt"
+        ]
+      },
+      "ProgressDay": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "status": {
+            "enum": [
+              "future",
+              "open",
+              "complete",
+              "grace",
+              "missed"
+            ]
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "values": {
+            "$ref": "#/components/schemas/Values"
+          },
+          "missingActions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgramId"
+            },
+            "maxItems": 12
+          }
+        },
+        "required": [
+          "date",
+          "status",
+          "complete",
+          "values",
+          "missingActions"
+        ]
+      },
+      "Progress": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "asOfDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "dayNumber": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 90
+          },
+          "completedDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 90
+          },
+          "consistencyDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 90
+          },
+          "graceUsed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 14
+          },
+          "graceRemaining": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 14
+          },
+          "tier": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgressDay"
+            },
+            "maxItems": 90,
+            "minItems": 1
+          },
+          "weekly": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "weekStart": {
+                  "type": "string",
+                  "format": "date",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "weekEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "$ref": "#/components/schemas/ProgramId"
+                      },
+                      "completed": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 7
+                      },
+                      "target": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 7
+                      },
+                      "met": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "completed",
+                      "target",
+                      "met"
+                    ]
+                  },
+                  "maxItems": 12
+                }
+              },
+              "required": [
+                "weekStart",
+                "weekEnd",
+                "actions"
+              ]
+            },
+            "maxItems": 14
+          }
+        },
+        "required": [
+          "asOfDate",
+          "endDate",
+          "dayNumber",
+          "completedDays",
+          "consistencyDays",
+          "graceUsed",
+          "graceRemaining",
+          "tier",
+          "days",
+          "weekly"
+        ],
+        "description": "Computed using the server's current time. Consistency includes grace gaps only after a later completed day bridges them. Weekly actions never gate daily completion."
+      },
+      "CheckinSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "values": {
+            "$ref": "#/components/schemas/Values"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "values",
+          "recordedAt"
+        ]
+      },
+      "CoachResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 800
+          },
+          "nextAction": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "actionId": {
+                "$ref": "#/components/schemas/ProgramId"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              }
+            },
+            "required": [
+              "actionId",
+              "text"
+            ]
+          }
+        },
+        "required": [
+          "message",
+          "nextAction"
+        ]
+      },
+      "CoachResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "responseVersion": {
+            "const": 1
+          },
+          "adapter": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "model": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "promptHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "programFingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "response": {
+            "$ref": "#/components/schemas/CoachResponse"
+          },
+          "fallback": {
+            "type": "boolean"
+          },
+          "requestedAdapter": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "requestedModel": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "errorCode": {
+            "enum": [
+              "COACH_TIMEOUT",
+              "COACH_HTTP_ERROR",
+              "COACH_NETWORK_ERROR",
+              "COACH_INVALID_RESPONSE",
+              "COACH_RESPONSE_TOO_LARGE",
+              "COACH_ADAPTER_ERROR"
+            ]
+          }
+        },
+        "required": [
+          "responseVersion",
+          "adapter",
+          "model",
+          "promptHash",
+          "programFingerprint",
+          "response",
+          "fallback"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "fallback": {
+                  "const": true
+                }
+              },
+              "required": [
+                "fallback"
+              ]
+            },
+            "then": {
+              "required": [
+                "requestedAdapter",
+                "requestedModel",
+                "errorCode"
+              ]
+            }
+          }
+        ],
+        "description": "A provider failure still returns a saved local response with fallback=true and sanitized failure metadata. It is not reported as successful AI."
+      },
+      "Trace": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "enrollmentId": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "programId": {
+            "$ref": "#/components/schemas/ProgramId"
+          },
+          "programVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "programFingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "input": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "enrollment": {
+                "$ref": "#/components/schemas/Enrollment"
+              },
+              "progress": {
+                "$ref": "#/components/schemas/Progress"
+              },
+              "checkins": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CheckinSnapshot"
+                },
+                "maxItems": 90
+              }
+            },
+            "required": [
+              "enrollment",
+              "progress",
+              "checkins"
+            ]
+          },
+          "result": {
+            "$ref": "#/components/schemas/CoachResult"
+          }
+        },
+        "required": [
+          "id",
+          "enrollmentId",
+          "createdAt",
+          "programId",
+          "programVersion",
+          "programFingerprint",
+          "input",
+          "result"
+        ]
+      },
+      "Outcome": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "enrollmentId": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "traceId": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "const": "participant-report"
+          },
+          "causalClaim": {
+            "const": false
+          }
+        },
+        "required": [
+          "id",
+          "enrollmentId",
+          "traceId",
+          "note",
+          "reportedAt",
+          "source",
+          "causalClaim"
+        ]
+      },
+      "CreateEnrollment": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "programId": {
+            "$ref": "#/components/schemas/ProgramId"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/Parameters"
+          },
+          "context": {
+            "$ref": "#/components/schemas/Context"
+          }
+        },
+        "required": [
+          "id",
+          "programId"
+        ]
+      },
+      "SaveCheckin": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "values": {
+            "$ref": "#/components/schemas/Values"
+          }
+        },
+        "required": [
+          "id",
+          "values"
+        ]
+      },
+      "RequestCoach": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecordId"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ReportOutcome": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "traceId": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "id",
+          "traceId",
+          "note"
+        ]
+      },
+      "EnrollmentView": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "enrollment": {
+            "$ref": "#/components/schemas/Enrollment"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/Progress"
+          }
+        },
+        "required": [
+          "enrollment",
+          "progress"
+        ]
+      },
+      "CoachView": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "trace": {
+            "$ref": "#/components/schemas/Trace"
+          },
+          "duplicate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "trace",
+          "duplicate"
+        ]
+      },
+      "OutcomeView": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "outcome": {
+            "$ref": "#/components/schemas/Outcome"
+          },
+          "duplicate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "outcome",
+          "duplicate"
+        ]
+      },
+      "TraceList": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "traces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Trace"
+            },
+            "maxItems": 1000
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Outcome"
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "traces",
+          "outcomes"
+        ]
+      },
+      "Health": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "mode": {
+            "const": "local-reference"
+          },
+          "storage": {
+            "const": "sqlite"
+          },
+          "apiVersion": {
+            "const": "1"
+          }
+        },
+        "required": [
+          "status",
+          "mode",
+          "storage",
+          "apiVersion"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "message": {
+                "type": "string"
+              },
+              "field": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "Program": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schemaVersion": {
+            "const": 1
+          },
+          "id": {
+            "$ref": "#/components/schemas/ProgramId"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "durationDays": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 90
+          },
+          "calendar": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "timeZone": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80,
+                "description": "An IANA time zone supported by the Node.js runtime."
+              },
+              "weekStartsOn": {
+                "const": 1
+              }
+            },
+            "required": [
+              "timeZone",
+              "weekStartsOn"
+            ]
+          },
+          "parameters": {
+            "type": "object",
+            "maxProperties": 12,
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "pattern": "^[a-z][a-z0-9-]{0,39}$"
+            },
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ParameterDefinition"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "maxItems": 12,
+            "minItems": 1
+          },
+          "consistency": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "graceDays": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 14
+              },
+              "graceMode": {
+                "const": "bridge"
+              }
+            },
+            "required": [
+              "graceDays",
+              "graceMode"
+            ]
+          },
+          "milestones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 90
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              },
+              "required": [
+                "at",
+                "label"
+              ]
+            },
+            "maxItems": 12
+          },
+          "coach": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "promptFile": {
+                "const": "coach.md"
+              },
+              "responseVersion": {
+                "const": 1
+              }
+            },
+            "required": [
+              "promptFile",
+              "responseVersion"
+            ]
+          },
+          "fingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "id",
+          "version",
+          "name",
+          "durationDays",
+          "calendar",
+          "parameters",
+          "actions",
+          "consistency",
+          "milestones",
+          "coach",
+          "fingerprint"
+        ],
+        "description": "Versioned, trusted local program configuration. At least one required daily action; distinct action IDs; ascending milestone thresholds within duration; grace cannot exceed duration. These cross-field constraints are validated by the implementation."
+      },
+      "Checkin": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecordId"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "values": {
+            "$ref": "#/components/schemas/Values"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "enrollmentId": {
+            "$ref": "#/components/schemas/RecordId"
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "values",
+          "recordedAt",
+          "enrollmentId"
+        ]
+      },
+      "ProgramList": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "programs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Program"
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "programs"
+        ]
+      },
+      "CheckinView": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "checkin": {
+            "$ref": "#/components/schemas/Checkin"
+          },
+          "enrollment": {
+            "$ref": "#/components/schemas/Enrollment"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/Progress"
+          },
+          "duplicate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "checkin",
+          "enrollment",
+          "progress",
+          "duplicate"
+        ]
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "Malformed JSON or interrupted request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "The Host or browser Origin is not accepted by this local server.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "Route, enrollment, or linked trace not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error405": {
+        "description": "Wrong method; see the Allow header.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        },
+        "headers": {
+          "Allow": {
+            "description": "The required method for this route.",
+            "schema": {
+              "enum": [
+                "GET",
+                "POST"
+              ]
+            }
+          }
+        }
+      },
+      "Error409": {
+        "description": "Conflicting write ID, changed program content without a new version, inactive round, or local record bound.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error413": {
+        "description": "JSON request body exceeds 32 KiB.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error415": {
+        "description": "Use uncompressed application/json.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error422": {
+        "description": "Request fields or program-dependent values are invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error500": {
+        "description": "Unexpected internal failure; no request data or stack trace is returned.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}
