@@ -1,5 +1,9 @@
 # OptimalAnt plane reference
 
+> **This project has moved to [optimal-ant/starter](https://github.com/optimal-ant/starter).**
+> Use that repository for the current source, setup instructions, issues, and test results.
+> This copy preserves the earlier history. Current terms remain all rights reserved, with local inspection and evaluation permitted.
+
 A small local foundation for programs, check-ins, coaching, and outcome evaluation:
 
 **Define a program → record a check-in → calculate progress → coach → record the outcome → compare a change.**
