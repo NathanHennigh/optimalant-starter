@@ -7,7 +7,7 @@ The two shipped examples use the same engine:
 | Program | Daily completion | Weekly tracking | Grace | Milestones |
 | --- | --- | --- | --- | --- |
 | `consistency-14` | Protein at the personal target; movement and sleep both true | Strength sessions, default 3 per Monday–Sunday week | 2 per 14-day round | Ember 1, Spark 3, Steady 7, Locked 14 |
-| `focus-7` | Focus minutes at the personal target, default 20 | None | 0 | Started 1, Building 3, Finished 7 |
+| `focus-7` | Focus minutes at the personal target, default 20 | None | 1 per 7-day round | Started 1, Building 3, Finished 7 |
 
 The challenge's movement checkbox means 8,000 steps **or** 30 minutes of cardio; sleep means at least seven hours. The engine evaluates the reported checkbox, not wearable data or exercise intensity. The default protein setting is an example, not a personal nutrition recommendation.
 
@@ -27,7 +27,7 @@ See [the focus definition](../programs/focus-7/program.json) for the smallest sh
 | `actions` | 1–12 uniquely named actions; at least one required daily action |
 | `consistency` | `graceDays`: integer from 0 to the smaller of 14 and duration; `graceMode: "bridge"` |
 | `milestones` | Up to 12 ascending `{at, label}` thresholds, from 1 to the program duration |
-| `coach` | Exactly `{"promptFile":"coach.md","responseVersion":1}` |
+| `coach` | Required `promptFile: "coach.md"` and `responseVersion: 1`; optional `visibleFields` list, described below |
 
 An action has `id`, `label`, `type` (`number` or `boolean`), `cadence` (`daily` or `weekly`), `target`, and `requiredForDay`. A number meets its target when it is greater than or equal to it. A boolean must equal its target. Numeric targets can be fixed numbers or `{"parameter":"setting-id"}`. Boolean targets are literal booleans.
 
@@ -53,17 +53,54 @@ Day status is one of:
 
 The earliest closed incomplete days consume grace, up to the round's allowance. Grace does not replenish after a reset. Trailing grace protects the existing consistency count but does not increase it. A later completed day bridges those grace days into the count. For example, complete → grace → complete yields **2 completed days and 3 consistency days**. A third missed day in the challenge breaks consistency once the two grace days are used.
 
-Milestones use `consistencyDays`, not `completedDays`. With bridge grace, Locked can mean a 14-day consistency span containing covered gaps; it is not a claim of 14 completed check-ins. A grace day alone cannot unlock a new level. No grace is offered in the focus example.
+Milestones use `consistencyDays`, not `completedDays`. With bridge grace, Locked can mean a 14-day consistency span containing covered gaps; it is not a claim of 14 completed check-ins. A grace day alone cannot unlock a new level. The focus example allows one grace day per round, with the same bridge behavior; its second closed missed day breaks consistency.
 
 Weekly strength uses Monday–Sunday calendar weeks. The target is not prorated for a partial first or last week; only dates inside the program round are counted. A day counts at most one strength session, based on its latest snapshot. Weekly strength progress never gates daily completion or consumes grace.
 
 ## Coaching instructions and saved versions
 
-`coach.md` describes the program's coaching approach. The Claude adapter uses it as trusted configuration, while participant context is separate untrusted input. The offline template uses program data and progress; it does **not** interpret arbitrary instructions in `coach.md`.
+`coach.md` describes the program's coaching approach. The Claude adapter uses it as trusted configuration, while allowed participant fields remain separate untrusted input. The offline template uses static program data and whichever progress fields are allowed; it does **not** interpret arbitrary instructions in `coach.md`.
 
 The coaching response has a plain-text `message` and one `nextAction` with a known `actionId` and plain-text `text`. It cannot award completion, alter the program, or execute tools. See [evaluation.md](evaluation.md) for testing prompt changes.
 
 An enrollment pins the program version, instructions, and fingerprint it started with. A fingerprint covers the validated definition, prompt, and cases. Changing any of those files requires a version bump before creating a new enrollment in the same database; existing enrollments continue using their saved version. The starter does not migrate live participants to candidate rules automatically.
+
+## Coach-visible fields
+
+`coach.visibleFields` is an optional array of up to 100 distinct supported paths. It controls the participant data passed to **every** adapter: local, custom, Claude, and the local fallback. Omitted or empty arrays pass no participant data. Older `schemaVersion: 1` definitions remain valid with that private default; unknown schema versions are rejected. Both shipped program versions explicitly declare the fields they use.
+
+For example, a focus coach can be given only the personal goal, focus target, and consistency count:
+
+```json
+{
+  "promptFile": "coach.md",
+  "responseVersion": 1,
+  "visibleFields": [
+    "enrollment.context.goal",
+    "enrollment.parameters.focus-minutes",
+    "progress.consistencyDays"
+  ]
+}
+```
+
+The supported paths are:
+
+| Area | Exact supported paths |
+| --- | --- |
+| Enrollment | `enrollment.startDate`; `enrollment.parameters.<declared parameter ID>` |
+| Participant context | `enrollment.context.goal`, `enrollment.context.startingPoint`, `enrollment.context.constraints`, `enrollment.context.notes` |
+| Progress totals | `progress.asOfDate`, `progress.endDate`, `progress.dayNumber`, `progress.completedDays`, `progress.consistencyDays`, `progress.graceUsed`, `progress.graceRemaining`, `progress.tier` |
+| Daily rows | `progress.days[].date`, `progress.days[].status`, `progress.days[].complete`, `progress.days[].missingActions`, `progress.days[].values.<declared action ID>` |
+| Weekly rows | `progress.weekly[].weekStart`, `progress.weekly[].weekEnd`, `progress.weekly[].actions[].id`, `progress.weekly[].actions[].completed`, `progress.weekly[].actions[].target`, `progress.weekly[].actions[].met` |
+| Check-in rows | `checkins[].date`, `checkins[].recordedAt`, `checkins[].values.<declared action ID>` |
+
+`[]` means the named field on each row of that array. It is not an arbitrary wildcard, and broad paths such as `progress`, `enrollment.context.*`, or `checkins[]` are rejected. Unknown paths, duplicates, and references to another program's parameter or action IDs are rejected at validation.
+
+Static program configuration and `coach.md` remain visible to adapters. A configured default target is not a participant's personal override; the override is shared only when its `enrollment.parameters.<id>` path is allowed. Do not put participant-specific information into static program files or prompts to bypass the policy.
+
+With no visible fields, adapters receive empty enrollment/progress objects and an empty check-in array. The local template offers a generic next step without asserting a personal day count or completion. The projection limits supplied data, not what a model could invent in its reply; output review remains necessary.
+
+Full enrollment and progress records remain in the local database and saved replay trace. The allowlist limits what reaches the coach; it is not a deletion policy, encryption mechanism, or authorization system. A trace's pinned program fingerprint identifies the visibility policy used. Existing enrollments keep their saved policy until a separate migration is designed.
 
 ## Try a third program locally
 
@@ -71,9 +108,9 @@ This exercise is for local inspection and evaluation under [the current reuse te
 
 1. Copy `programs/focus-7` to `programs/reading-7`.
 2. In the copy's `program.json`, set `id` to `reading-7`, `name` to `7-day reading sprint`, and rename `focus-minutes` to `reading-minutes` everywhere. Set its default to 10.
-3. Rename the action `focus` to `read`, use a reading label, and point its target at `reading-minutes`. Keep the existing daily cadence, calendar, grace, and milestone format.
+3. Rename the action `focus` to `read`, use a reading label, and point its target at `reading-minutes`. Also rename those IDs inside `coach.visibleFields`, including `enrollment.parameters.focus-minutes`, `progress.days[].values.focus`, and `checkins[].values.focus` wherever present. Keep the existing daily cadence, calendar, one-grace-day allowance, and milestone format.
 4. Write reading-specific guidance in the copied `coach.md`.
-5. Update the copied `cases.json` to use `read` and `reading-minutes`. Include a complete 10-minute day, a partial 9-minute day, and a missed day. Each expected result should match the scenario, not merely copy an old result.
+5. Update the copied `cases.json` to use `read` and `reading-minutes`. Include a complete 10-minute day, a partial 9-minute day, a covered grace day, and a second missed day. Each expected result should match the scenario, not merely copy an old result.
 6. Run:
 
 ```sh

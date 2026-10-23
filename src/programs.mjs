@@ -39,6 +39,31 @@ function target(value, parameters, field, type, integer = false) {
   return { parameter: name };
 }
 
+/** An exact field policy, not a general JSON path language. Missing policy denies participant data. */
+export function validateCoachVisibleFields(raw = [], parameters = {}, actions = []) {
+  const field = "program.coach.visibleFields";
+  if (!Array.isArray(raw) || raw.length > 100) throw new InputError("Provide at most 100 unique coaching fields.", field);
+  const allowed = new Set([
+    "enrollment.startDate",
+    ...Object.keys(parameters).map(id => `enrollment.parameters.${id}`),
+    ...["goal", "startingPoint", "constraints", "notes"].map(key => `enrollment.context.${key}`),
+    ...["asOfDate", "endDate", "dayNumber", "completedDays", "consistencyDays", "graceUsed", "graceRemaining", "tier"].map(key => `progress.${key}`),
+    ...["date", "status", "complete", "missingActions"].map(key => `progress.days[].${key}`),
+    ...actions.map(action => `progress.days[].values.${action.id}`),
+    ...["weekStart", "weekEnd"].map(key => `progress.weekly[].${key}`),
+    ...["id", "completed", "target", "met"].map(key => `progress.weekly[].actions[].${key}`),
+    "checkins[].date", "checkins[].recordedAt",
+    ...actions.map(action => `checkins[].values.${action.id}`),
+  ]);
+  const seen = new Set();
+  return raw.map((path, index) => {
+    if (typeof path !== "string" || !allowed.has(path)) throw new InputError("Unknown coaching field; use an exact supported path from this program.", `${field}[${index}]`);
+    if (seen.has(path)) throw new InputError("Coaching fields must be unique.", `${field}[${index}]`);
+    seen.add(path);
+    return path;
+  });
+}
+
 /** The schema deliberately supports data, never executable expressions or code. */
 export function validateProgram(raw) {
   object(raw, ["schemaVersion", "id", "version", "name", "durationDays", "calendar", "parameters", "actions", "consistency", "milestones", "coach"], [], "program");
@@ -97,10 +122,11 @@ export function validateProgram(raw) {
     previous = at;
     return { at, label: text(value.label, `${field}.label`, 60) };
   });
-  object(raw.coach, ["promptFile", "responseVersion"], [], "program.coach");
+  object(raw.coach, ["promptFile", "responseVersion"], ["visibleFields"], "program.coach");
   if (raw.coach.promptFile !== "coach.md") throw new InputError("The program prompt must be coach.md in its own directory.", "program.coach.promptFile");
   if (raw.coach.responseVersion !== 1) throw new InputError("Unsupported coaching response version.", "program.coach.responseVersion");
-  return { schemaVersion: 1, id, version, name, durationDays, calendar: { timeZone, weekStartsOn: 1 }, parameters, actions, consistency: { graceDays, graceMode: "bridge" }, milestones, coach: { promptFile: "coach.md", responseVersion: 1 } };
+  const visibleFields = validateCoachVisibleFields(raw.coach.visibleFields, parameters, actions);
+  return { schemaVersion: 1, id, version, name, durationDays, calendar: { timeZone, weekStartsOn: 1 }, parameters, actions, consistency: { graceDays, graceMode: "bridge" }, milestones, coach: { promptFile: "coach.md", responseVersion: 1, visibleFields } };
 }
 
 export function resolveParameters(definition, raw = {}) {

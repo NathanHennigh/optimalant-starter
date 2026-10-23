@@ -796,12 +796,23 @@
               },
               "responseVersion": {
                 "const": 1
+              },
+              "visibleFields": {
+                "type": "array",
+                "maxItems": 100,
+                "uniqueItems": true,
+                "default": [],
+                "items": {
+                  "$ref": "#/components/schemas/CoachVisibleField"
+                },
+                "description": "Optional participant-field allowlist, enforced before local, custom, Claude, and fallback adapters. Omitted or empty means no participant data. Static program configuration and coach.md always remain visible; defaults are not personal overrides. Full replay inputs remain stored locally. This policy does not prevent invented claims in model output."
               }
             },
             "required": [
               "promptFile",
               "responseVersion"
-            ]
+            ],
+            "description": "Schema version 1 accepts this optional allowlist for backward compatibility. Unknown coach properties and unsupported schema versions are rejected. Existing enrollments keep their pinned policy."
           }
         },
         "required": [
@@ -1227,7 +1238,8 @@
               "enrollment",
               "progress",
               "checkins"
-            ]
+            ],
+            "description": "Full local replay snapshot, retained in SQLite. The actual adapter input is a narrower projection selected by the pinned program coach.visibleFields; this object is not evidence that every stored field was sent to the coach."
           },
           "result": {
             "$ref": "#/components/schemas/CoachResult"
@@ -1598,12 +1610,23 @@
               },
               "responseVersion": {
                 "const": 1
+              },
+              "visibleFields": {
+                "type": "array",
+                "maxItems": 100,
+                "uniqueItems": true,
+                "default": [],
+                "items": {
+                  "$ref": "#/components/schemas/CoachVisibleField"
+                },
+                "description": "Optional participant-field allowlist, enforced before local, custom, Claude, and fallback adapters. Omitted or empty means no participant data. Static program configuration and coach.md always remain visible; defaults are not personal overrides. Full replay inputs remain stored locally. This policy does not prevent invented claims in model output."
               }
             },
             "required": [
               "promptFile",
               "responseVersion"
-            ]
+            ],
+            "description": "Schema version 1 accepts this optional allowlist for backward compatibility. Unknown coach properties and unsupported schema versions are rejected. Existing enrollments keep their pinned policy."
           },
           "fingerprint": {
             "type": "string",
@@ -1695,6 +1718,44 @@
           "enrollment",
           "progress",
           "duplicate"
+        ]
+      },
+      "CoachVisibleField": {
+        "type": "string",
+        "description": "One exact supported participant-data path. [] selects a field on each row, not an arbitrary wildcard. Dynamic parameter/action IDs must be declared by this same program; cross-program IDs and unknown paths are rejected by runtime validation.",
+        "anyOf": [
+          {
+            "enum": [
+              "enrollment.startDate",
+              "enrollment.context.goal",
+              "enrollment.context.startingPoint",
+              "enrollment.context.constraints",
+              "enrollment.context.notes",
+              "progress.asOfDate",
+              "progress.endDate",
+              "progress.dayNumber",
+              "progress.completedDays",
+              "progress.consistencyDays",
+              "progress.graceUsed",
+              "progress.graceRemaining",
+              "progress.tier",
+              "progress.days[].date",
+              "progress.days[].status",
+              "progress.days[].complete",
+              "progress.days[].missingActions",
+              "progress.weekly[].weekStart",
+              "progress.weekly[].weekEnd",
+              "progress.weekly[].actions[].id",
+              "progress.weekly[].actions[].completed",
+              "progress.weekly[].actions[].target",
+              "progress.weekly[].actions[].met",
+              "checkins[].date",
+              "checkins[].recordedAt"
+            ]
+          },
+          {
+            "pattern": "^(?:enrollment\\.parameters\\.[a-z][a-z0-9-]{0,39}|progress\\.days\\[\\]\\.values\\.[a-z][a-z0-9-]{0,39}|checkins\\[\\]\\.values\\.[a-z][a-z0-9-]{0,39})$"
+          }
         ]
       }
     },

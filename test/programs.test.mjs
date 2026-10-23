@@ -45,6 +45,22 @@ test("check-in values preserve absent fields and distinguish false from missing"
   for (const value of [{ protein: 1.2 }, { protein: -1 }, { protein: "160" }, { movement: 1 }, { sleep: "true" }, { unknown: true }, { strength: null }, null]) assert.throws(() => validateValues(consistency, value), InputError);
 });
 
+test("coach visibility accepts only unique fields belonging to this program", () => {
+  const fields = ["enrollment.parameters.focus-minutes", "enrollment.context.constraints", "progress.graceRemaining", "progress.days[].values.focus", "checkins[].values.focus"];
+  assert.deepEqual(validateProgram(change(focus, def => { def.coach.visibleFields = fields; })).coach.visibleFields, fields);
+  for (const invalid of [null, "progress", ["progress"], ["enrollment.context.*"], ["progress.days[].values.protein"], ["enrollment.parameters.protein-goal"], ["checkins[].id"], ["__proto__.secret"], ["progress.tier", "progress.tier"], Array(101).fill("progress.tier")]) {
+    assert.throws(() => validateProgram(change(focus, def => { def.coach.visibleFields = invalid; })), InputError);
+  }
+});
+
+test("legacy or empty coach policies default to no participant fields", () => {
+  for (const mutation of [def => { delete def.coach.visibleFields; }, def => { def.coach.visibleFields = []; }]) {
+    const definition = validateProgram(change(focus, mutation));
+    assert.deepEqual(definition.coach.visibleFields, []);
+    assert.deepEqual(resolveParameters(definition), { "focus-minutes": 20 });
+  }
+});
+
 test("program schema rejects unknown fields, expressions, malformed references, and daily-gated weekly actions", () => {
   const invalid = [
     def => { def.expression = "process.exit()"; },
@@ -75,7 +91,7 @@ test("a third reading program loads and evaluates using data and prompts alone",
     parameters: { pages: { label: "Pages each day", default: 8, min: 1, max: 100 } },
     actions: [{ id: "read", label: "Read a few pages", type: "number", unit: "pages", integer: true, cadence: "daily", target: { parameter: "pages" }, requiredForDay: true }],
     consistency: { graceDays: 0, graceMode: "bridge" }, milestones: [{ at: 1, label: "Reading" }, { at: 5, label: "Finished" }],
-    coach: { promptFile: "coach.md", responseVersion: 1 },
+    coach: { promptFile: "coach.md", responseVersion: 1, visibleFields: ["enrollment.parameters.pages", "progress.consistencyDays", "progress.asOfDate", "progress.days[].date", "progress.days[].complete", "progress.days[].missingActions", "progress.days[].values.read"] },
   };
   const input = { startDate: "2026-10-19", asOf: "2026-10-19T22:00:00Z", checkins: [{ id: "read1", date: "2026-10-19", recordedAt: "2026-10-19T21:00:00Z", values: { read: 8 } }] };
   await writeFile(join(folder, "program.json"), JSON.stringify(definition));

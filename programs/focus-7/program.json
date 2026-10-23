@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "focus-7",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "7-day focus sprint",
   "durationDays": 7,
   "calendar": { "timeZone": "America/New_York", "weekStartsOn": 1 },
@@ -11,11 +11,34 @@
   "actions": [
     { "id": "focus", "label": "Complete your focused work session", "type": "number", "unit": "minutes", "integer": true, "cadence": "daily", "target": { "parameter": "focus-minutes" }, "requiredForDay": true }
   ],
-  "consistency": { "graceDays": 0, "graceMode": "bridge" },
+  "consistency": { "graceDays": 1, "graceMode": "bridge" },
   "milestones": [
     { "at": 1, "label": "Started" },
     { "at": 3, "label": "Building" },
     { "at": 7, "label": "Finished" }
   ],
-  "coach": { "promptFile": "coach.md", "responseVersion": 1 }
+  "coach": {
+    "promptFile": "coach.md",
+    "responseVersion": 1,
+    "visibleFields": [
+      "enrollment.startDate",
+      "enrollment.parameters.focus-minutes",
+      "enrollment.context.goal",
+      "enrollment.context.startingPoint",
+      "enrollment.context.constraints",
+      "progress.asOfDate",
+      "progress.endDate",
+      "progress.dayNumber",
+      "progress.completedDays",
+      "progress.consistencyDays",
+      "progress.graceUsed",
+      "progress.graceRemaining",
+      "progress.tier",
+      "progress.days[].date",
+      "progress.days[].status",
+      "progress.days[].complete",
+      "progress.days[].missingActions",
+      "progress.days[].values.focus"
+    ]
+  }
 }

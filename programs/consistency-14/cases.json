@@ -4,62 +4,1002 @@
     {
       "id": "first-day-complete",
       "description": "Three daily targets complete a recovery day without a strength session.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 160, "movement": true, "sleep": true, "strength": false } }] },
-      "expected": { "dayNumber": 1, "completedDays": 1, "consistencyDays": 1, "graceUsed": 0, "tier": "Ember" }
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true,
+              "strength": false
+            }
+          }
+        ]
+      },
+      "expected": {
+        "dayNumber": 1,
+        "completedDays": 1,
+        "consistencyDays": 1,
+        "graceUsed": 0,
+        "tier": "Ember"
+      }
     },
     {
       "id": "partial-day-open",
       "description": "Protein below target leaves today's check-in open without using grace.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 159, "movement": true, "sleep": true } }] },
-      "expected": { "completedDays": 0, "consistencyDays": 0, "graceUsed": 0, "graceRemaining": 2, "tier": "Begin again" }
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 159,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 0,
+        "consistencyDays": 0,
+        "graceUsed": 0,
+        "graceRemaining": 2,
+        "tier": "Begin again"
+      }
     },
     {
       "id": "personal-protein-goal",
       "description": "The participant's protein target overrides the example default.",
-      "input": { "startDate": "2026-10-19", "parameters": { "protein-goal": 120 }, "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 120, "movement": true, "sleep": true } }] },
-      "expected": { "completedDays": 1, "consistencyDays": 1, "tier": "Ember" }
+      "input": {
+        "startDate": "2026-10-19",
+        "parameters": {
+          "protein-goal": 120
+        },
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 120,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 1,
+        "consistencyDays": 1,
+        "tier": "Ember"
+      }
     },
     {
       "id": "grace-protects-earned-card",
       "description": "A closed missed day uses grace but does not itself advance the earned streak.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-21T14:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 160, "movement": true, "sleep": true } }] },
-      "expected": { "completedDays": 1, "consistencyDays": 1, "graceUsed": 1, "graceRemaining": 1, "tier": "Ember" }
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-21T14:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 1,
+        "consistencyDays": 1,
+        "graceUsed": 1,
+        "graceRemaining": 1,
+        "tier": "Ember",
+        "days": [
+          {
+            "date": "2026-10-19",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-20",
+            "status": "grace",
+            "complete": false
+          },
+          {
+            "date": "2026-10-21",
+            "status": "open",
+            "complete": false
+          },
+          {
+            "date": "2026-10-22",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-23",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-24",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-25",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-26",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-27",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-28",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-29",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-30",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-31",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-11-01",
+            "status": "future",
+            "complete": false
+          }
+        ]
+      }
     },
     {
       "id": "completed-day-bridges-grace",
       "description": "Completing the next day bridges a protected miss and advances the consistency count.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-21T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 160, "movement": true, "sleep": true } }, { "id": "day3", "date": "2026-10-21", "recordedAt": "2026-10-21T21:00:00Z", "values": { "protein": 170, "movement": true, "sleep": true } }] },
-      "expected": { "completedDays": 2, "consistencyDays": 3, "graceUsed": 1, "tier": "Spark" }
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-21T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "protein": 170,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 2,
+        "consistencyDays": 3,
+        "graceUsed": 1,
+        "tier": "Spark"
+      }
     },
     {
       "id": "grace-does-not-replenish",
-      "description": "After two protected misses, a third closed miss resets the streak.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-23T14:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 160, "movement": true, "sleep": true } }] },
-      "expected": { "completedDays": 1, "consistencyDays": 0, "graceUsed": 2, "graceRemaining": 0, "tier": "Begin again" }
+      "description": "After two protected misses, a third closed miss resets the streak and remains incomplete. Grace never creates a completed day.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-23T14:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 1,
+        "consistencyDays": 0,
+        "graceUsed": 2,
+        "graceRemaining": 0,
+        "tier": "Begin again",
+        "days": [
+          {
+            "date": "2026-10-19",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-20",
+            "status": "grace",
+            "complete": false
+          },
+          {
+            "date": "2026-10-21",
+            "status": "grace",
+            "complete": false
+          },
+          {
+            "date": "2026-10-22",
+            "status": "missed",
+            "complete": false
+          },
+          {
+            "date": "2026-10-23",
+            "status": "open",
+            "complete": false
+          },
+          {
+            "date": "2026-10-24",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-25",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-26",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-27",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-28",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-29",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-30",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-31",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-11-01",
+            "status": "future",
+            "complete": false
+          }
+        ]
+      }
     },
     {
       "id": "latest-snapshot-replaces",
       "description": "A later same-day correction replaces the entire previous snapshot; it does not merge omitted fields.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "initial", "date": "2026-10-19", "recordedAt": "2026-10-19T20:00:00Z", "values": { "protein": 160, "movement": true, "sleep": true } }, { "id": "correction", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "protein": 140 } }] },
-      "expected": { "completedDays": 0, "consistencyDays": 0, "graceUsed": 0 }
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": [
+          {
+            "id": "initial",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T20:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "correction",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 140
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 0,
+        "consistencyDays": 0,
+        "graceUsed": 0
+      }
     },
     {
       "id": "eastern-day-before-midnight",
       "description": "UTC can already be tomorrow while the Eastern check-in remains open.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-20T03:59:59Z", "checkins": [] },
-      "expected": { "asOfDate": "2026-10-19", "dayNumber": 1, "graceUsed": 0 }
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-20T03:59:59Z",
+        "checkins": []
+      },
+      "expected": {
+        "asOfDate": "2026-10-19",
+        "dayNumber": 1,
+        "graceUsed": 0
+      }
     },
     {
       "id": "eastern-midnight-closes-day",
       "description": "The prior day closes at midnight Eastern, not midnight UTC.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-20T04:00:00Z", "checkins": [] },
-      "expected": { "asOfDate": "2026-10-20", "dayNumber": 2, "graceUsed": 1, "consistencyDays": 0 }
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-20T04:00:00Z",
+        "checkins": []
+      },
+      "expected": {
+        "asOfDate": "2026-10-20",
+        "dayNumber": 2,
+        "graceUsed": 1,
+        "consistencyDays": 0
+      }
     },
     {
       "id": "weekly-strength-is-separate",
       "description": "A strength session can be recorded while daily targets are incomplete.",
-      "input": { "startDate": "2026-10-19", "parameters": { "strength-days": 1 }, "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "strength1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "strength": true } }] },
-      "expected": { "completedDays": 0, "consistencyDays": 0, "graceUsed": 0 }
+      "input": {
+        "startDate": "2026-10-19",
+        "parameters": {
+          "strength-days": 1
+        },
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": [
+          {
+            "id": "strength1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "strength": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 0,
+        "consistencyDays": 0,
+        "graceUsed": 0
+      }
+    },
+    {
+      "id": "milestone-before-ember",
+      "description": "0 completed days is just before the ember milestone; the tier must be Begin again.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": []
+      },
+      "expected": {
+        "completedDays": 0,
+        "consistencyDays": 0,
+        "graceUsed": 0,
+        "graceRemaining": 2,
+        "tier": "Begin again"
+      }
+    },
+    {
+      "id": "milestone-at-ember",
+      "description": "1 completed day is at the ember milestone; the tier must be Ember.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 1,
+        "consistencyDays": 1,
+        "graceUsed": 0,
+        "graceRemaining": 2,
+        "tier": "Ember"
+      }
+    },
+    {
+      "id": "milestone-before-spark",
+      "description": "2 completed days is just before the spark milestone; the tier must be Ember.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-20T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 2,
+        "consistencyDays": 2,
+        "graceUsed": 0,
+        "graceRemaining": 2,
+        "tier": "Ember"
+      }
+    },
+    {
+      "id": "milestone-at-spark",
+      "description": "3 completed days is at the spark milestone; the tier must be Spark.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-21T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 3,
+        "consistencyDays": 3,
+        "graceUsed": 0,
+        "graceRemaining": 2,
+        "tier": "Spark"
+      }
+    },
+    {
+      "id": "milestone-before-steady",
+      "description": "6 completed days is just before the steady milestone; the tier must be Spark.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-24T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day4",
+            "date": "2026-10-22",
+            "recordedAt": "2026-10-22T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day5",
+            "date": "2026-10-23",
+            "recordedAt": "2026-10-23T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day6",
+            "date": "2026-10-24",
+            "recordedAt": "2026-10-24T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 6,
+        "consistencyDays": 6,
+        "graceUsed": 0,
+        "graceRemaining": 2,
+        "tier": "Spark"
+      }
+    },
+    {
+      "id": "milestone-at-steady",
+      "description": "7 completed days is at the steady milestone; the tier must be Steady.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-25T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day4",
+            "date": "2026-10-22",
+            "recordedAt": "2026-10-22T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day5",
+            "date": "2026-10-23",
+            "recordedAt": "2026-10-23T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day6",
+            "date": "2026-10-24",
+            "recordedAt": "2026-10-24T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day7",
+            "date": "2026-10-25",
+            "recordedAt": "2026-10-25T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 7,
+        "consistencyDays": 7,
+        "graceUsed": 0,
+        "graceRemaining": 2,
+        "tier": "Steady"
+      }
+    },
+    {
+      "id": "milestone-before-locked",
+      "description": "13 completed days is just before the locked milestone; the tier must be Steady.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-31T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day4",
+            "date": "2026-10-22",
+            "recordedAt": "2026-10-22T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day5",
+            "date": "2026-10-23",
+            "recordedAt": "2026-10-23T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day6",
+            "date": "2026-10-24",
+            "recordedAt": "2026-10-24T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day7",
+            "date": "2026-10-25",
+            "recordedAt": "2026-10-25T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day8",
+            "date": "2026-10-26",
+            "recordedAt": "2026-10-26T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day9",
+            "date": "2026-10-27",
+            "recordedAt": "2026-10-27T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day10",
+            "date": "2026-10-28",
+            "recordedAt": "2026-10-28T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day11",
+            "date": "2026-10-29",
+            "recordedAt": "2026-10-29T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day12",
+            "date": "2026-10-30",
+            "recordedAt": "2026-10-30T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day13",
+            "date": "2026-10-31",
+            "recordedAt": "2026-10-31T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 13,
+        "consistencyDays": 13,
+        "graceUsed": 0,
+        "graceRemaining": 2,
+        "tier": "Steady"
+      }
+    },
+    {
+      "id": "milestone-at-locked",
+      "description": "14 completed days is at the locked milestone; the tier must be Locked.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-11-01T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day4",
+            "date": "2026-10-22",
+            "recordedAt": "2026-10-22T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day5",
+            "date": "2026-10-23",
+            "recordedAt": "2026-10-23T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day6",
+            "date": "2026-10-24",
+            "recordedAt": "2026-10-24T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day7",
+            "date": "2026-10-25",
+            "recordedAt": "2026-10-25T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day8",
+            "date": "2026-10-26",
+            "recordedAt": "2026-10-26T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day9",
+            "date": "2026-10-27",
+            "recordedAt": "2026-10-27T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day10",
+            "date": "2026-10-28",
+            "recordedAt": "2026-10-28T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day11",
+            "date": "2026-10-29",
+            "recordedAt": "2026-10-29T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day12",
+            "date": "2026-10-30",
+            "recordedAt": "2026-10-30T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day13",
+            "date": "2026-10-31",
+            "recordedAt": "2026-10-31T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          },
+          {
+            "id": "day14",
+            "date": "2026-11-01",
+            "recordedAt": "2026-11-01T21:00:00Z",
+            "values": {
+              "protein": 160,
+              "movement": true,
+              "sleep": true
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 14,
+        "consistencyDays": 14,
+        "graceUsed": 0,
+        "graceRemaining": 2,
+        "tier": "Locked"
+      }
     }
   ]
 }

@@ -11,7 +11,11 @@ const snapshot = (date, values = full, id = date) => ({ id, date, recordedAt: `$
 const evaluate = (checkins = [], asOf = "2026-10-19T22:00:00Z", definition = consistency, startDate = "2026-10-19", parameters) => evaluateProgram(definition, { startDate, asOf, checkins, ...(parameters ? { parameters } : {}) });
 
 function assertSubset(actual, expected) {
-  if (expected && typeof expected === "object" && !Array.isArray(expected)) {
+  if (Array.isArray(expected)) {
+    assert.ok(Array.isArray(actual));
+    assert.equal(actual.length, expected.length);
+    expected.forEach((value, index) => assertSubset(actual[index], value));
+  } else if (expected && typeof expected === "object") {
     for (const [key, value] of Object.entries(expected)) assertSubset(actual[key], value);
   } else assert.deepEqual(actual, expected);
 }
@@ -24,6 +28,24 @@ for (const pack of packs.values()) {
     });
   }
 }
+
+test("published sample cases cover both sides of every milestone, including zero to one", () => {
+  const expectedBoundaries = {
+    "consistency-14": [[0, "Begin again"], [1, "Ember"], [2, "Ember"], [3, "Spark"], [6, "Spark"], [7, "Steady"], [13, "Steady"], [14, "Locked"]],
+    "focus-7": [[0, "Begin again"], [1, "Started"], [2, "Started"], [3, "Building"], [6, "Building"], [7, "Finished"]],
+  };
+  for (const [id, boundaries] of Object.entries(expectedBoundaries)) {
+    const samples = packs.get(id).cases.cases;
+    for (const [days, tier] of boundaries) assert.ok(samples.some(sample => sample.expected.consistencyDays === days && sample.expected.tier === tier && sample.expected.completedDays === days && sample.expected.graceUsed === 0), `${id} needs a fixed ${days}-day / ${tier} sample`);
+  }
+});
+
+test("published grace and missed-day samples explicitly assert incomplete days", () => {
+  for (const pack of packs.values()) {
+    assert.ok(pack.cases.cases.some(sample => sample.expected.graceUsed > 0 && sample.expected.days?.some(day => day.status === "grace" && day.complete === false)), `${pack.definition.id} needs a consumed grace day that is explicitly incomplete`);
+    assert.ok(pack.cases.cases.some(sample => sample.expected.days?.some(day => day.status === "missed" && day.complete === false)), `${pack.definition.id} needs a closed miss that is explicitly incomplete`);
+  }
+});
 
 test("a current incomplete day remains open and future dates do not spend grace", () => {
   const result = evaluate();
@@ -117,12 +139,16 @@ test("milestones follow the consistency count and a full round earns Locked", ()
   assert.equal(finished.days.length, 14);
 });
 
-test("a final-day miss closes after the round and cannot silently count as an open day", () => {
+test("a protected final-day miss closes as grace and cannot falsely award Finished", () => {
   const events = Array.from({ length: 6 }, (_, index) => snapshot(addDays("2026-10-19", index), { focus: 20 }));
   assert.equal(evaluate(events, "2026-10-25T22:00:00Z", focus).consistencyDays, 6);
   const after = evaluate(events, "2026-10-26T05:00:00Z", focus);
-  assert.equal(after.consistencyDays, 0);
-  assert.equal(after.days.at(-1).status, "missed");
+  assert.equal(after.consistencyDays, 6);
+  assert.equal(after.completedDays, 6);
+  assert.equal(after.graceUsed, 1);
+  assert.equal(after.days.at(-1).status, "grace");
+  assert.equal(after.days.at(-1).complete, false);
+  assert.equal(after.tier, "Building");
 });
 
 test("numeric targets use at-least comparisons and boolean targets require actual booleans", () => {

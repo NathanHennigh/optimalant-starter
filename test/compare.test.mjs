@@ -10,7 +10,11 @@ function pack() {
       parameters: { minutes: { label: "Minutes", default: 20, min: 1, max: 120 } },
       actions: [{ id: "focus", label: "Focused work", type: "number", cadence: "daily", target: { parameter: "minutes" }, requiredForDay: true, unit: "minutes" }],
       consistency: { graceDays: 0, graceMode: "bridge" }, milestones: [{ at: 1, label: "Started" }, { at: 7, label: "Finished" }],
-      coach: { promptFile: "coach.md", responseVersion: 1 },
+      coach: { promptFile: "coach.md", responseVersion: 1, visibleFields: [
+        "enrollment.startDate", "enrollment.parameters.minutes", "enrollment.context.constraints",
+        "progress.asOfDate", "progress.consistencyDays", "progress.days[].date", "progress.days[].complete", "progress.days[].missingActions", "progress.days[].values.focus",
+        "checkins[].date", "checkins[].recordedAt", "checkins[].values.focus",
+      ] },
     },
     prompt: "Help with focused work and respect constraints.",
     cases: { schemaVersion: 1, cases: [{
@@ -84,7 +88,8 @@ test("replay coaching resolves default targets and receives the same latest snap
   for (const value of seen) {
     assert.deepEqual(value.enrollment.parameters, { minutes: 20 });
     assert.equal(value.checkins.length, 1);
-    assert.equal(value.checkins[0].id, "a-correction");
+    assert.equal(value.checkins[0].id, undefined);
+    assert.equal(value.checkins[0].values.focus, 10);
     assert.equal(value.progress.days[0].values.focus, value.checkins[0].values.focus);
   }
 });
@@ -125,6 +130,7 @@ test("a third program uses the same runner with only data and prompts changed", 
   reading.definition.name = "Reading sprint";
   reading.definition.actions[0].id = "reading";
   reading.definition.actions[0].label = "Reading";
+  reading.definition.coach.visibleFields = reading.definition.coach.visibleFields.map(path => path.replace(/\.focus$/, ".reading"));
   reading.prompt = "Support a daily reading habit.";
   reading.cases.cases[0].input.checkins[0].values = { reading: 20 };
   reading.cases.cases[0].rubric.allowedActionIds = ["reading"];

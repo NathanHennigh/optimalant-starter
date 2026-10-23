@@ -55,7 +55,7 @@ Each program lives in a directory with three files:
 
 | File | Purpose |
 | --- | --- |
-| `program.json` | Duration, parameters, daily and weekly actions, consistency rules, and milestones |
+| `program.json` | Duration, parameters, daily and weekly actions, consistency rules, milestones, and which participant fields the coach may see |
 | `coach.md` | Program-specific instructions for the coach |
 | `cases.json` | Synthetic cases with expected progress and coaching checks |
 
@@ -66,12 +66,14 @@ This is a bounded configuration format, not a general-purpose programming langua
 ## Rules and coaching are separate
 
 - The rules engine determines completion, streaks, grace use, weekly progress, and milestones.
-- A coach receives the program instructions plus a validated snapshot of the participant's context and calculated progress.
+- A coach receives static program instructions and only the participant fields explicitly listed in `coach.visibleFields`. Omitted or empty lists share no participant data, including with the offline coach or fallback.
 - The coach returns a message and a proposed next action. It cannot rewrite check-ins, award milestones, or change the rules.
 - A saved trace records what was recommended and the program/coach information used. A later outcome attaches a participant-reported note to that trace.
 - The evaluation harness replays fixed cases to help review a proposed change. It never automatically promotes a prompt, model, or rule into production.
 
 Self-reported outcomes are observations, not proof that a recommendation caused improvement. The reference does not train or fine-tune a model.
+
+The local database retains the full replay snapshot for each trace; the visibility list controls the narrower input passed to an adapter. Static program defaults remain visible and are separate from a participant's personal overrides. See [the program guide](docs/programs.md#coach-visible-fields) for the exact supported paths and how older definitions behave.
 
 ## Optional Claude connection
 
@@ -83,7 +85,7 @@ ANTHROPIC_API_KEY=<your own key>
 ANTHROPIC_MODEL=<a model ID available to your account>
 ```
 
-For the evaluation harness, opt in separately with `--claude`; follow [the evaluation guide](docs/evaluation.md). Never commit a key. Claude calls transmit the supplied program instructions and coaching context to Anthropic and can incur charges. Use invented data while evaluating this reference. The implementation bounds and validates replies, records failures, and falls back to the local coach. Tests mock the provider and do not establish that a live key or model is available.
+For the evaluation harness, opt in separately with `--claude`; follow [the evaluation guide](docs/evaluation.md). Never commit a key. Claude calls transmit static program instructions and the explicitly allowed participant fields to Anthropic and can incur charges. Use invented data while evaluating this reference. The implementation bounds and validates replies, records failures, and falls back to the local coach. Field filtering limits the data supplied to a coach; it does not guarantee that model-generated text cannot invent a claim. Tests mock the provider and do not establish that a live key or model is available.
 
 ## Configuration
 

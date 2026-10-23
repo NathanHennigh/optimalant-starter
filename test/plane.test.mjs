@@ -86,10 +86,44 @@ test('published version content cannot silently change and old enrollments retai
   plane = createPlane({programs:changedPrograms,dbPath,clock:() => start});
   assert.throws(() => plane.createEnrollment({id:'second',programId:'focus-7'}), /version change/);
   assert.deepEqual(plane.getEnrollment('original').enrollment.parameters,original.enrollment.parameters);
-  changed.definition.version = '1.0.1';
+  changed.definition.version = '1.2.0';
   const next = plane.createEnrollment({id:'second',programId:'focus-7'});
   assert.equal(next.enrollment.parameters['focus-minutes'],30);
   assert.equal(plane.getEnrollment('original').enrollment.parameters['focus-minutes'],20);
   changedPrograms.delete('focus-7');
-  assert.equal(plane.createEnrollment({id:'original',programId:'focus-7'}).enrollment.programVersion,'1.0.0');
+  assert.equal(plane.createEnrollment({id:'original',programId:'focus-7'}).enrollment.programVersion,programs.get('focus-7').definition.version);
+});
+
+test('pre-policy enrollments keep their saved rules and disclose no participant fields to coaches', async t => {
+  const dir = await mkdtemp(join(tmpdir(), 'plane-legacy-policy-'));
+  const dbPath = join(dir, 'test.sqlite');
+  const legacy = structuredClone(programs.get('focus-7'));
+  legacy.definition.version = '1.0.0';
+  legacy.definition.consistency.graceDays = 0;
+  delete legacy.definition.coach.visibleFields;
+  legacy.fingerprint = 'synthetic-legacy-snapshot';
+  const oldPrograms = new Map([['focus-7', legacy]]);
+  let plane = createPlane({programs:oldPrograms,dbPath,clock:() => start});
+  t.after(async () => {plane.close();await rm(dir,{recursive:true,force:true});});
+  plane.createEnrollment({id:'legacy',programId:'focus-7',context:{notes:'Private local note'}});
+  plane.saveCheckIn('legacy',{id:'day-one',values:{focus:20}});
+  plane.close();
+  let visible;
+  plane = createPlane({programs,dbPath,clock:() => '2026-10-21T16:00:00.000Z',coach:{id:'visibility-test',async reply(input) {
+    visible = input;
+    return {message:'Choose your next focus session.',nextAction:{actionId:'focus',text:'Choose a quiet time.'}};
+  }}});
+  const original = plane.getEnrollment('legacy');
+  assert.equal(original.enrollment.programVersion,'1.0.0');
+  assert.equal(original.progress.graceRemaining,0);
+  assert.equal(original.progress.days[1].status,'missed');
+  assert.equal(original.progress.consistencyDays,0);
+  await plane.coachEnrollment('legacy',{id:'legacy-coach'});
+  assert.deepEqual(visible.enrollment,{});
+  assert.deepEqual(visible.progress,{});
+  assert.deepEqual(visible.checkins,[]);
+  assert.doesNotMatch(JSON.stringify(visible),/Private local note/);
+  const current = plane.createEnrollment({id:'current',programId:'focus-7'});
+  assert.equal(current.enrollment.programVersion,'1.1.0');
+  assert.equal(current.progress.graceRemaining,1);
 });

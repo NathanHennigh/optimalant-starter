@@ -20,7 +20,9 @@ Both `--baseline` and `--candidate` are required together. Do not combine that p
 
 A failed rule assertion or coaching check makes the command exit with a nonzero status. Baseline failures also fail the run: an already-broken reference should not make a candidate look good. Errors loading configuration or writing a report also exit nonzero.
 
-The offline coach is a template that uses the program definition and computed progress. It does not interpret `coach.md`. Changing only that prompt will therefore not demonstrate improved coaching in an offline comparison.
+The offline coach is a template that uses the program definition and only the computed progress fields allowed by `coach.visibleFields`. It does not interpret `coach.md`. Changing only that prompt will therefore not demonstrate improved coaching in an offline comparison.
+
+The harness applies each version's visibility policy before calling its coach, including local templates and fallback. A comparison keeps the underlying case inputs fixed; changing the allowlist can intentionally change the subset the coach receives. Omitted or empty lists share no participant fields and produce generic local coaching. Inspect visibility changes alongside prompt and rule changes rather than treating a smaller input as identical coaching context. The full local case and computed results remain available to evaluate rules; the allowlist is an adapter-input boundary, not a test-data deletion rule.
 
 ## Case format
 
@@ -53,7 +55,7 @@ The offline coach is a template that uses the program definition and computed pr
       "expected": {
         "completedDays": 1,
         "consistencyDays": 1,
-        "graceRemaining": 0,
+        "graceRemaining": 1,
         "tier": "Started"
       },
       "rubric": {
@@ -82,6 +84,8 @@ The JSON file wraps comparisons in `{"schemaVersion":1,"reports":[...]}`. Each c
 - Counts of baseline/candidate rule failures, coaching-check failures, and regressions.
 - An explicit human-review requirement and review questions.
 
+GitHub CI also saves the full synthetic offline comparison. Open the repository's **Actions** tab, select a completed **Reference checks** run, and download an `offline-comparison-node-<version>` artifact. It contains `offline-comparison.json` with both versions' coach responses and rule checks. Artifacts are retained for 14 days. These reports use the local template; they do not contain real Claude calls or participant data.
+
 A regression is counted when a baseline case passed a rule or coaching check group and the candidate failed that group. The overall result also fails if either version fails any required group.
 
 Automated coaching checks verify a valid known next action, no provider fallback, optional literal rubric phrases, and a few explicit numerical claim patterns such as “3 consistency days.” They do **not** recognize every way a coach could misstate a fact, ignore a constraint, or give poor advice. A provider failure is visible as a fallback and fails the coaching-success check rather than being presented as successful AI.
@@ -100,12 +104,12 @@ Or provide a baseline/candidate pair together with `--claude`. Without that flag
 
 Each case calls the baseline and candidate sequentially, using the same configured model and key; even comparing a program against itself makes two calls per case. Responses can differ between runs. This implementation does not provide a random seed or guarantee deterministic model output. The report records the model and prompt fingerprints for review.
 
-Provider calls send the synthetic participant context, program instructions, check-ins, and calculated progress to Anthropic and can incur charges. Use your own key; no OptimalAnt credits are provided. The adapter has a timeout, reply-size bounds, structured validation, and a recorded local fallback. These are technical bounds, not an account spending cap.
+Provider calls send static program instructions and only the synthetic participant fields declared in that program's `coach.visibleFields` to Anthropic and can incur charges. Static program defaults are visible independently of personal parameter overrides. Use your own key; no OptimalAnt credits are provided. The adapter has a timeout, reply-size bounds, structured validation, and a recorded local fallback using the same filtered context. These are technical bounds, not an account spending cap or a guarantee against invented claims.
 
 The test suite mocks the provider. Passing tests is not evidence that a live credential, account, model, or network connection works.
 
 ## From traces to evidence
 
-The local API stores what a coach saw and recommended, with the program version and response metadata. A participant can attach an outcome note to that trace. A note is stored as `source: "participant-report"` and `causalClaim: false`; it does not automatically change completion, become a training example, or update a prompt.
+The local API stores the full local replay snapshot and the recommendation, with the program version and response metadata. That snapshot can contain fields the coach was not allowed to see: the adapter receives a filtered projection according to the pinned program's `coach.visibleFields`. A participant can attach an outcome note to the trace. A note is stored as `source: "participant-report"` and `causalClaim: false`; it does not automatically change completion, become a training example, or update a prompt.
 
 Turning real outcomes into evaluation cases requires a deliberate review and privacy process. No private participant data is uploaded to this public repository or published as a case by this reference.

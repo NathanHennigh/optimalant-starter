@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "consistency-14",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "14-day consistency challenge",
   "durationDays": 14,
   "calendar": { "timeZone": "America/New_York", "weekStartsOn": 1 },
@@ -22,5 +22,38 @@
     { "at": 7, "label": "Steady" },
     { "at": 14, "label": "Locked" }
   ],
-  "coach": { "promptFile": "coach.md", "responseVersion": 1 }
+  "coach": {
+    "promptFile": "coach.md",
+    "responseVersion": 1,
+    "visibleFields": [
+      "enrollment.startDate",
+      "enrollment.parameters.protein-goal",
+      "enrollment.parameters.strength-days",
+      "enrollment.context.goal",
+      "enrollment.context.startingPoint",
+      "enrollment.context.constraints",
+      "progress.asOfDate",
+      "progress.endDate",
+      "progress.dayNumber",
+      "progress.completedDays",
+      "progress.consistencyDays",
+      "progress.graceUsed",
+      "progress.graceRemaining",
+      "progress.tier",
+      "progress.days[].date",
+      "progress.days[].status",
+      "progress.days[].complete",
+      "progress.days[].missingActions",
+      "progress.days[].values.protein",
+      "progress.days[].values.movement",
+      "progress.days[].values.sleep",
+      "progress.days[].values.strength",
+      "progress.weekly[].weekStart",
+      "progress.weekly[].weekEnd",
+      "progress.weekly[].actions[].id",
+      "progress.weekly[].actions[].completed",
+      "progress.weekly[].actions[].target",
+      "progress.weekly[].actions[].met"
+    ]
+  }
 }

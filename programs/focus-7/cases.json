@@ -4,44 +4,775 @@
     {
       "id": "first-session-complete",
       "description": "Twenty focused minutes meets the default daily target.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 20 } }] },
-      "expected": { "completedDays": 1, "consistencyDays": 1, "graceRemaining": 0, "tier": "Started" }
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 1,
+        "consistencyDays": 1,
+        "graceRemaining": 1,
+        "tier": "Started"
+      }
     },
     {
       "id": "short-session-open",
       "description": "Nineteen minutes does not meet the default target; the current day remains open.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 19 } }] },
-      "expected": { "completedDays": 0, "consistencyDays": 0, "graceUsed": 0 }
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 19
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 0,
+        "consistencyDays": 0,
+        "graceUsed": 0,
+        "graceRemaining": 1
+      }
     },
     {
       "id": "personal-focus-target",
       "description": "A configured thirty-minute session uses the same rules engine.",
-      "input": { "startDate": "2026-10-19", "parameters": { "focus-minutes": 30 }, "asOf": "2026-10-19T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 25 } }] },
-      "expected": { "completedDays": 0, "consistencyDays": 0 }
+      "input": {
+        "startDate": "2026-10-19",
+        "parameters": {
+          "focus-minutes": 30
+        },
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 25
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 0,
+        "consistencyDays": 0
+      }
     },
     {
       "id": "today-can-still-be-completed",
       "description": "An unsaved current day preserves yesterday's streak until local midnight.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-20T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 20 } }] },
-      "expected": { "completedDays": 1, "consistencyDays": 1, "tier": "Started" }
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-20T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 1,
+        "consistencyDays": 1,
+        "tier": "Started"
+      }
     },
     {
       "id": "missed-day-resets",
-      "description": "This program has no grace days, so a closed missed day resets consistency.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-21T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 20 } }] },
-      "expected": { "completedDays": 1, "consistencyDays": 0, "graceUsed": 0, "tier": "Begin again" }
+      "description": "After the one grace day is consumed, a second closed missed day resets consistency and remains incomplete.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-22T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 1,
+        "consistencyDays": 0,
+        "graceUsed": 1,
+        "graceRemaining": 0,
+        "tier": "Begin again",
+        "days": [
+          {
+            "date": "2026-10-19",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-20",
+            "status": "grace",
+            "complete": false
+          },
+          {
+            "date": "2026-10-21",
+            "status": "missed",
+            "complete": false
+          },
+          {
+            "date": "2026-10-22",
+            "status": "open",
+            "complete": false
+          },
+          {
+            "date": "2026-10-23",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-24",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-25",
+            "status": "future",
+            "complete": false
+          }
+        ]
+      }
     },
     {
       "id": "new-streak-after-miss",
-      "description": "A completed session after a missed day starts a new count at one.",
-      "input": { "startDate": "2026-10-19", "asOf": "2026-10-21T22:00:00Z", "checkins": [{ "id": "day1", "date": "2026-10-19", "recordedAt": "2026-10-19T21:00:00Z", "values": { "focus": 20 } }, { "id": "day3", "date": "2026-10-21", "recordedAt": "2026-10-21T21:00:00Z", "values": { "focus": 25 } }] },
-      "expected": { "completedDays": 2, "consistencyDays": 1, "tier": "Started" }
+      "description": "A completed session after grace is exhausted and a day is missed starts a new count at one.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-22T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day4",
+            "date": "2026-10-22",
+            "recordedAt": "2026-10-22T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 2,
+        "consistencyDays": 1,
+        "graceUsed": 1,
+        "graceRemaining": 0,
+        "tier": "Started"
+      }
     },
     {
       "id": "fall-back-local-midnight",
       "description": "After the autumn DST change, Eastern midnight occurs at 05:00 UTC.",
-      "input": { "startDate": "2026-11-01", "asOf": "2026-11-02T04:59:59Z", "checkins": [{ "id": "day1", "date": "2026-11-01", "recordedAt": "2026-11-02T04:30:00Z", "values": { "focus": 20 } }] },
-      "expected": { "asOfDate": "2026-11-01", "dayNumber": 1, "completedDays": 1, "consistencyDays": 1 }
+      "input": {
+        "startDate": "2026-11-01",
+        "asOf": "2026-11-02T04:59:59Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-11-01",
+            "recordedAt": "2026-11-02T04:30:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "asOfDate": "2026-11-01",
+        "dayNumber": 1,
+        "completedDays": 1,
+        "consistencyDays": 1
+      }
+    },
+    {
+      "id": "milestone-before-started",
+      "description": "0 completed days is just before the started milestone; the tier must be Begin again.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": []
+      },
+      "expected": {
+        "completedDays": 0,
+        "consistencyDays": 0,
+        "graceUsed": 0,
+        "graceRemaining": 1,
+        "tier": "Begin again"
+      }
+    },
+    {
+      "id": "milestone-at-started",
+      "description": "1 completed day is at the started milestone; the tier must be Started.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-19T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 1,
+        "consistencyDays": 1,
+        "graceUsed": 0,
+        "graceRemaining": 1,
+        "tier": "Started"
+      }
+    },
+    {
+      "id": "milestone-before-building",
+      "description": "2 completed days is just before the building milestone; the tier must be Started.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-20T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 2,
+        "consistencyDays": 2,
+        "graceUsed": 0,
+        "graceRemaining": 1,
+        "tier": "Started"
+      }
+    },
+    {
+      "id": "milestone-at-building",
+      "description": "3 completed days is at the building milestone; the tier must be Building.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-21T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 3,
+        "consistencyDays": 3,
+        "graceUsed": 0,
+        "graceRemaining": 1,
+        "tier": "Building"
+      }
+    },
+    {
+      "id": "milestone-before-finished",
+      "description": "6 completed days is just before the finished milestone; the tier must be Building.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-24T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day4",
+            "date": "2026-10-22",
+            "recordedAt": "2026-10-22T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day5",
+            "date": "2026-10-23",
+            "recordedAt": "2026-10-23T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day6",
+            "date": "2026-10-24",
+            "recordedAt": "2026-10-24T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 6,
+        "consistencyDays": 6,
+        "graceUsed": 0,
+        "graceRemaining": 1,
+        "tier": "Building"
+      }
+    },
+    {
+      "id": "milestone-at-finished",
+      "description": "7 completed days is at the finished milestone; the tier must be Finished.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-25T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day4",
+            "date": "2026-10-22",
+            "recordedAt": "2026-10-22T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day5",
+            "date": "2026-10-23",
+            "recordedAt": "2026-10-23T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day6",
+            "date": "2026-10-24",
+            "recordedAt": "2026-10-24T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day7",
+            "date": "2026-10-25",
+            "recordedAt": "2026-10-25T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 7,
+        "consistencyDays": 7,
+        "graceUsed": 0,
+        "graceRemaining": 1,
+        "tier": "Finished"
+      }
+    },
+    {
+      "id": "grace-protects-earned-card",
+      "description": "The one grace day protects an earned day without inventing completion or advancing the tier.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-21T14:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 1,
+        "consistencyDays": 1,
+        "graceUsed": 1,
+        "graceRemaining": 0,
+        "tier": "Started",
+        "days": [
+          {
+            "date": "2026-10-19",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-20",
+            "status": "grace",
+            "complete": false
+          },
+          {
+            "date": "2026-10-21",
+            "status": "open",
+            "complete": false
+          },
+          {
+            "date": "2026-10-22",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-23",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-24",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-25",
+            "status": "future",
+            "complete": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "completed-day-bridges-grace",
+      "description": "Completing the day after a protected miss bridges the grace day and reaches Building with two actual completed days.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-21T22:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 2,
+        "consistencyDays": 3,
+        "graceUsed": 1,
+        "graceRemaining": 0,
+        "tier": "Building",
+        "days": [
+          {
+            "date": "2026-10-19",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-20",
+            "status": "grace",
+            "complete": false
+          },
+          {
+            "date": "2026-10-21",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-22",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-23",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-24",
+            "status": "future",
+            "complete": false
+          },
+          {
+            "date": "2026-10-25",
+            "status": "future",
+            "complete": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "grace-does-not-replenish",
+      "description": "Starting a new streak after a reset does not replenish the one grace day; another closed miss resets the new streak.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-24T14:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day4",
+            "date": "2026-10-22",
+            "recordedAt": "2026-10-22T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "completedDays": 2,
+        "consistencyDays": 0,
+        "graceUsed": 1,
+        "graceRemaining": 0,
+        "tier": "Begin again",
+        "days": [
+          {
+            "date": "2026-10-19",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-20",
+            "status": "grace",
+            "complete": false
+          },
+          {
+            "date": "2026-10-21",
+            "status": "missed",
+            "complete": false
+          },
+          {
+            "date": "2026-10-22",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-23",
+            "status": "missed",
+            "complete": false
+          },
+          {
+            "date": "2026-10-24",
+            "status": "open",
+            "complete": false
+          },
+          {
+            "date": "2026-10-25",
+            "status": "future",
+            "complete": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "final-grace-does-not-finish",
+      "description": "A protected final-day miss preserves six earned days but never awards the seven-day Finished milestone.",
+      "input": {
+        "startDate": "2026-10-19",
+        "asOf": "2026-10-26T05:00:00Z",
+        "checkins": [
+          {
+            "id": "day1",
+            "date": "2026-10-19",
+            "recordedAt": "2026-10-19T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day2",
+            "date": "2026-10-20",
+            "recordedAt": "2026-10-20T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day3",
+            "date": "2026-10-21",
+            "recordedAt": "2026-10-21T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day4",
+            "date": "2026-10-22",
+            "recordedAt": "2026-10-22T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day5",
+            "date": "2026-10-23",
+            "recordedAt": "2026-10-23T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          },
+          {
+            "id": "day6",
+            "date": "2026-10-24",
+            "recordedAt": "2026-10-24T21:00:00Z",
+            "values": {
+              "focus": 20
+            }
+          }
+        ]
+      },
+      "expected": {
+        "dayNumber": 7,
+        "completedDays": 6,
+        "consistencyDays": 6,
+        "graceUsed": 1,
+        "graceRemaining": 0,
+        "tier": "Building",
+        "days": [
+          {
+            "date": "2026-10-19",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-20",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-21",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-22",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-23",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-24",
+            "status": "complete",
+            "complete": true
+          },
+          {
+            "date": "2026-10-25",
+            "status": "grace",
+            "complete": false
+          }
+        ]
+      }
     }
   ]
 }

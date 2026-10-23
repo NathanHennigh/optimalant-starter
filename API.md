@@ -120,7 +120,7 @@ Daily status is `future`, `open`, `complete`, `grace`, or `missed`. An incomplet
 
 ### Coach trace
 
-A trace records its ID, enrollment, creation time, pinned program information, the input snapshot, and a `result`. The input includes the enrollment, computed progress, and latest check-in snapshot for each recorded day.
+A trace records its ID, enrollment, creation time, pinned program information, the input snapshot, and a `result`. The input retains the full local enrollment, computed progress, and latest check-in snapshot for each recorded day. This local replay record is broader than the coach input: before any adapter runs, `coach.visibleFields` selects the participant fields it may receive. The static program definition and instructions remain available. An omitted or empty allowlist shares no participant data, including with the local template and fallback. The pinned program fingerprint identifies that policy; no additional visibility metadata is added to the response. See [the program guide](docs/programs.md#coach-visible-fields).
 
 `result` contains `responseVersion: 1`, `adapter`, `model` (null for the local template), `promptHash`, `programFingerprint`, `response`, and `fallback`. A response looks like:
 

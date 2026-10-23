@@ -27,7 +27,9 @@ Program definitions, prompt files, and provider adapters are trusted local confi
 
 The local coach makes no provider calls. An API key alone does not activate Claude: the server requires an explicit provider selection, and live evaluation requires `--claude`. Keep credentials in the process environment; never put them in program files, prompts, requests, reports, or Git.
 
-When Claude is enabled, program instructions and the validated coaching context are sent to Anthropic. Responses are bounded and validated, and provider failures use a recorded local fallback. The application does not let model output execute tools or alter the rules. Prompt separation and validation reduce accidental misuse; they do not guarantee resistance to every prompt injection or make advice clinically reliable.
+Before any local, custom, Claude, or fallback adapter runs, the program's `coach.visibleFields` allowlist filters participant data. Omitted or empty lists share no participant fields. Static program configuration and `coach.md` always remain visible, so keep participant-specific information out of those files. The full replay snapshot is still stored locally; the allowlist is not a storage-deletion or authentication mechanism.
+
+When Claude is enabled, those static instructions and explicitly allowed participant fields are sent to Anthropic. Responses are bounded and validated, and provider failures use a recorded local fallback with the same projection. The application does not let model output execute tools or alter the rules. Field filtering, prompt separation, and validation do not guarantee resistance to every prompt injection, prevent every invented claim, or make advice clinically reliable.
 
 There is no monthly budget control or per-person AI allowance in this reference. A timeout, payload limit, or record bound is not a cost cap. Anyone who can access the local endpoint can trigger enabled coaching calls, so do not expose it. Review the provider's data handling and costs before using real data or enabling calls.
 

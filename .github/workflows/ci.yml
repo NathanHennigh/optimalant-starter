@@ -21,4 +21,10 @@ jobs:
       - run: npm run check:programs
       - run: npm test
       - run: npm run example
-      - run: npm run evaluate
+      - run: npm run evaluate -- --output artifacts/offline-comparison.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: offline-comparison-node-${{ matrix.node }}
+          path: artifacts/offline-comparison.json
+          retention-days: 14
